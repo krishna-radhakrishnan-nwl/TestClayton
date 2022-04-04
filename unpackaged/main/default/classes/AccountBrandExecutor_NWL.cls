@@ -45,6 +45,9 @@ public class AccountBrandExecutor_NWL implements Base_NWL.Executor {
             for(Account_Brand__c ab:accountBrand){
                 String accountSegment =  ab.Opportunity_Account__c + ab.Opportunity_Sub_Segment__c;
                 accountBrandMap.put(accountSegment, ab);
+                List<Account_Brand__c> accountBrand = [SELECT Id, Opportunity_Account__c, Opportunity_Sub_Segment__c
+                                                        FROM Account_Brand__c 
+                                                        WHERE Id = :ab.Id];
             }
 
             System.debug('--->> AccountBrandExecutor_NWL::execute::accountBrandMap::before [' + accountBrandMap +']');
