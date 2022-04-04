@@ -36,7 +36,8 @@ global class Account1EWebservice_NWL {
 			result = C_FAILURE + ' Invalid SAP Account Number : ' + sapAccountNo ;  
 		} 
 
-		System.debug( 'Account1EWebservice_NWL::update1EAccount::result {' + result + '}');     
+		System.debug( 'Account1EWebservice_NWL::update1EAccount::result {' + result + '}');
+		System.debug( 'Account1EWebservice_NWL::update1EAccount::result {' + result + '}');
 		return result;
 	}
 }
