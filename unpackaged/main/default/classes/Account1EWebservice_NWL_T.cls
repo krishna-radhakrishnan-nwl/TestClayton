@@ -25,6 +25,7 @@ private class Account1EWebservice_NWL_T {
 													Account WHERE Newell_ID__c = :NEW_NEWELL_ID LIMIT 1 ];
 			System.assert(aList.size() == 1);
 		System.test.stopTest();
+		List<Account> accList = [Select Id,Name From Account Limit 100];
 	}
 	
 	@isTest 
