@@ -60,6 +60,8 @@ public class AccountBrandExecutor_NWL implements Base_NWL.Executor {
                     accountBrandMap.put(newAccountSegment, ab);
                 }
             }
+            List<Account> accL = [SELECT Id, Name from Account LIMIT 500];
+            
 
             System.debug('--->> AccountBrandExecutor_NWL::execute::insertAccountBrand [' + insertAccountBrand +']');
             if (insertAccountBrand != null) {
