@@ -1,0 +1,198 @@
+@istest
+public with sharing class CampaignRegistrationRestApi_NWL_T {
+    public static CampaignRegistrationRestApi_NWL.RegistrationData regData;
+    public static CampaignRegistrationRestApi_NWL.ContactData conData;
+    public static CampaignRegistrationRestApi_NWL.ProductData prodData;
+    public static CampaignRegistrationRestApi_NWL.BankData bankData;
+    public static CampaignRegistrationRestApi_NWL.GiftData giftData;
+    public static CampaignRegistrationRestApi_NWL.AttachmentData attachData;
+    public static CampaignRegistrationRestApi_NWL.AdditionalData addData;
+    @testSetup
+    public static void createTestData() {
+        GenerateTestData_NWL_T g = new GenerateTestData_NWL_T();
+        g.aRecordType = Schema.SObjectType.Account.getRecordTypeInfosByName().get('Generic Consumer Account').getRecordTypeId();
+         List<Account> accList = g.account(1, 'Test Acc', null, null);
+        // Generate Test Contacts
+		g.conType               = 'Employee';
+		g.conRegion             = 'US';
+		g.conMailingstreet      = '3 Glenlake Pkwy';
+		g.conMailingCity        = 'Georgia';
+		g.conMailingStateCode   = 'GA';
+		g.conMailingPostalCode  = '30328';
+		g.conMailingCountryCode = 'US';
+		g.conPhone              = '4434434433';
+		g.conMobilePhone        = '545545544';
+		g.conLang               = 'English';
+		g.conHasOptedOutOfEmail = false;
+        g.employeeId = 'AB120';
+		List<Contact> cList = g.contacts( 1, 'TestContactLookup',accList[0].Id,'test@newellco.com');
+		System.assertEquals(1, cList.size());
+        cList[0].Salutation = 'Mr.';
+        //cList[0].RecordTypeId = Schema.SObjectType.Account.getRecordTypeInfosByName().get('Generic Consumer Account').getRecordTypeId();
+        update cList[0];
+        StateCountry_NWL__c stateSett = new StateCountry_NWL__c(Name='US-GA',Value__c='GA',Country__c='US',StateISOCode2Digit__c='GA',
+                                                                Country_Label__c='United States',Label__c='Georgia',IsActive__c=true);
+        insert stateSett;
+        g.cmMinProductsPerOrderProduct=1;
+        g.cmMaxOrderProductsPerContact=5;
+        g.cmMaxProductsPerRegistration=5;
+        g.cmMinProductsPerRegistration=1;
+        List<Campaign> camList = g.campaigns('Gift With Purchase', 'Test Campaign', 1, true);
+        camList[0].PostalPOPAllowed__c='Yes';
+        camList[0].IsActive = true;
+        camList[0].Status='Planned';
+        camList[0].Type='Promotion';camList[0].Description='Test';camList[0].Brand__c='ACE';camList[0].POPApprovalRequired__c=true;
+        update camList[0];
+        g.eBizMapTrans='Date';
+        g.eBizMappings('Campaign Registration', 'CampaignRegistration', 'CampaignRegistration', 'Test');
+    }
+
+   public static testmethod void testGetReq(){
+		RestRequest request = new RestRequest();
+        RestResponse res = new RestResponse();
+        request.requestUri ='https://nwl/api/campaign/registration/*';
+        request.httpMethod = 'GET';	
+        RestContext.request = request;
+        RestContext.response = res;
+      	CampaignRegistrationRestApi_NWL.getCampaignRegistrationData();
+       	RestRequest request1 = new RestRequest();
+        RestResponse res1 = new RestResponse();
+        request.requestUri ='';
+        request1.httpMethod = 'GET';	
+        RestContext.request = request1;
+        RestContext.response = res1;
+       CampaignRegistrationRestApi_NWL.getCampaignRegistrationData();
+   }
+    public static testmethod void testPostReq(){
+        GenerateTestData_NWL_T g=new GenerateTestData_NWL_T();
+        Account acc = [SELECT Id FROM Account LIMIT 1];
+        List<Contact> cList = [SELECT Salutation,FirstName,LastName,MailingCity,MailingCountryCode,MailingPostalCode,MailingStateCode,Mailingstreet,Phone
+                              FROM Contact];
+        Campaign camp = [SELECT Id,Name,Type FROM Campaign LIMIT 1];
+       Ebiz_Mapping__c ebizMapp = [SELECT Id,Object__c FROM Ebiz_Mapping__c LIMIT 1];
+       regData=new CampaignRegistrationRestApi_NWL.RegistrationData();
+       conData =new CampaignRegistrationRestApi_NWL.ContactData();
+       giftData = new CampaignRegistrationRestApi_NWL.GiftData();
+       attachData =new CampaignRegistrationRestApi_NWL.AttachmentData();
+       addData = new CampaignRegistrationRestApi_NWL.AdditionalData();
+       addData.key='campaignregistration';addData.value='Test';
+        attachData.fileName='FileOne.txt';
+        attachData.fileMimeType='text/plain';
+        attachData.fileBodyBase64='Dummy Binary Attachment Text';
+        giftData.giftItem=String.valueOf(false);
+        giftData.question='Test Question';
+        giftData.answer='Test Answer';
+        conData.email='test@newellco.com';
+        conData.firstName=cList[0].FirstName;
+        conData.lastName=cList[0].LastName;
+        conData.mailingCity=cList[0].MailingCity;
+        conData.mailingCountryCode=cList[0].MailingCountryCode;
+        conData.mailingPostalCode=cList[0].mailingPostalCode;
+        conData.mailingStateCode=cList[0].mailingStateCode;
+        conData.mailingstreet=cList[0].mailingstreet;
+        conData.phone='4434434456';
+        conData.salutation=cList[0].Salutation;
+       	regData.ContactData = conData;
+        regData.brand='graco';
+        regData.source='web';
+        regData.campaignId=camp.Id;
+        regData.campaignName=camp.Name;
+        regData.campaignType=camp.Type;
+        regData.giftData=giftData;
+        regData.attachmentData=attachData;
+        regData.additionalDataList=new List<CampaignRegistrationRestApi_NWL.AdditionalData>{addData};
+		RestRequest request = new RestRequest();
+        RestResponse res = new RestResponse();
+        request.requestUri ='https://nwl/api/campaign/registration/*';
+       	request.httpMethod = 'POST';	
+       	request.requestBody = Blob.valueOf(JSON.serialize(regData));
+        RestContext.request = request;
+        RestContext.response = res;
+      CampaignRegistrationRestApi_NWL.postCampaignRegistrationData();
+      acc.RecordTypeId=Schema.SObjectType.Account.getRecordTypeInfosByName().get('SAP Account').getRecordTypeId();
+      update acc;
+      cList[0].accountId=acc.Id;
+        update cList[0];
+        ebizMapp.Key__c='Contact';
+        ebizMapp.Object__c = 'Contact';
+        ebizMapp.Field_Api_Name__c='FirstName';
+        update ebizMapp;
+        addData.key='Contact';addData.value='Test';
+ 		conData.email='test@newellco.com';
+        conData.firstName=cList[0].FirstName;
+        conData.lastName=cList[0].LastName;
+        conData.mailingCity=cList[0].MailingCity;
+        conData.mailingCountryCode=cList[0].MailingCountryCode;
+        conData.mailingPostalCode=cList[0].mailingPostalCode;
+        conData.mailingStateCode=cList[0].mailingStateCode;
+        conData.mailingstreet=cList[0].mailingstreet;
+        conData.phone=cList[0].Phone;
+        conData.salutation=cList[0].Salutation;
+       	regData.ContactData = conData;
+        regData.additionalDataList=new List<CampaignRegistrationRestApi_NWL.AdditionalData>{addData};
+        RestRequest request1 = new RestRequest();
+        RestResponse res1 = new RestResponse();
+        request1.requestUri ='https://nwl/api/campaign/registration/*';
+       	request1.httpMethod = 'POST';	
+       	request1.requestBody = Blob.valueOf(JSON.serialize(regData));
+        RestContext.request = request1;
+        RestContext.response = res1;
+      CampaignRegistrationRestApi_NWL.postCampaignRegistrationData();      
+   }
+    @isTest
+    public static void testPostReq1(){
+        GenerateTestData_NWL_T g=new GenerateTestData_NWL_T();
+        Account acc = [SELECT Id FROM Account LIMIT 1];
+        List<Contact> cList = [SELECT Salutation,FirstName,LastName,MailingCity,MailingCountryCode,MailingPostalCode,MailingStateCode,Mailingstreet,Phone
+                              FROM Contact];
+        Campaign camp = [SELECT Id,Name,Type FROM Campaign LIMIT 1];
+       CampaignRegistration__c camReg = new CampaignRegistration__c(Campaign__c=camp.Id,Contact__c=cList[0].Id);
+       insert camReg;
+        Brand__c brand=g.brand('Graco');
+        g.cmBrandId=brand.id;
+        g.cmMinProductsPerOrderProduct=2;
+        g.cmMaxOrderProductsPerContact=5;
+        g.cmMaxProductsPerRegistration=5;
+        g.cmMinProductsPerRegistration=2;
+        List<Campaign> campList = g.campaigns('Gift With Purchase', 'Test Campaign1', 1, true);
+		 regData=new CampaignRegistrationRestApi_NWL.RegistrationData();
+       conData =new CampaignRegistrationRestApi_NWL.ContactData();
+       giftData = new CampaignRegistrationRestApi_NWL.GiftData();
+       attachData =new CampaignRegistrationRestApi_NWL.AttachmentData();
+       addData = new CampaignRegistrationRestApi_NWL.AdditionalData();
+       addData.key='campaignregistration';addData.value=String.valueOf(System.today());
+        attachData.fileName='FileOne.txt';
+        attachData.fileMimeType='text/plain';
+        attachData.fileBodyBase64='Dummy Binary Attachment Text';
+        giftData.giftItem=String.valueOf(false);
+        giftData.question='Test Question';
+        giftData.answer='Test Answer';
+        conData.email='test@newellco.com';
+        conData.firstName=cList[0].FirstName;
+        conData.lastName=cList[0].LastName;
+        conData.mailingCity=cList[0].MailingCity;
+        conData.mailingCountryCode=cList[0].MailingCountryCode;
+        conData.mailingPostalCode=cList[0].mailingPostalCode;
+        conData.mailingStateCode=cList[0].mailingStateCode;
+        conData.mailingstreet=cList[0].mailingstreet;
+        conData.phone='4434434456';
+        conData.salutation=cList[0].Salutation;
+       	regData.ContactData = conData;
+        regData.brand='graco';
+        regData.source='web';
+        regData.campaignId=camp.Id;
+        regData.campaignName=camp.Name;
+        regData.campaignType=camp.Type;
+        regData.giftData=giftData;
+        regData.attachmentData=attachData;
+        regData.additionalDataList=new List<CampaignRegistrationRestApi_NWL.AdditionalData>{addData};
+		RestRequest request = new RestRequest();
+        RestResponse res = new RestResponse();
+        request.requestUri ='https://nwl/api/campaign/registration/*';
+       	request.httpMethod = 'POST';	
+       	request.requestBody = Blob.valueOf(JSON.serialize(regData));
+        RestContext.request = request;
+        RestContext.response = res;
+      CampaignRegistrationRestApi_NWL.postCampaignRegistrationData();
+    }
+}
