@@ -1,0 +1,211 @@
+<template>
+    <!-- lightning button for open modal window -->
+    <lightning-button
+       label={label.AddCaseProduct}
+       title={label.AddCaseProduct}
+       onclick={openModal}
+       class="slds-m-right_x-small">
+    </lightning-button>
+    <!--Use template if:true to display/hide popup based on isModalOpen value--> 
+    <template if:true={isModalOpen}>
+        <!-- Modal/Popup Box LWC starts here -->
+        <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+                <!-- Modal/Popup Box LWC header here -->
+                <header class="slds-modal__header">
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={closeModal}>
+                        <lightning-icon icon-name="utility:close"
+                            alternative-text="close"
+                            variant="inverse"
+                            size="small" ></lightning-icon>
+                        <span class="slds-assistive-text">Close</span>
+                    </button>
+                    <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">{label.SearchCaseProduct}</h2>
+                </header>
+                <!-- Search inputs -->
+                <div class="slds-modal__content slds-grid slds-nowrap">
+                    <div class="slds-p-left_medium slds-col slds-size_1-of-3">
+                            <ul>
+                                <!--MaterialNumber-->
+                                <li>
+                                    <lightning-layout-item flexibility="auto">
+                                        <lightning-input data-id="reset" class="inp" type="text" name="input1" label={label.QS_Material_Number} onkeypress={keycheck}  onchange={handleMatNum} placeholder="ex: 1752264" > </lightning-input>
+                                    </lightning-layout-item>
+                                </li>
+                                <!--MaterialDescription-->
+                                <template if:false={jaFields}>
+                                    <li>
+                                        <lightning-layout-item flexibility="auto">
+                                            <lightning-input data-id="reset" class="inp" type="text" name="input2" label={label.QS_Product_Name} onkeypress={keycheck}  onchange={handleMatDesc} placeholder="ex: LabelWriter 450"></lightning-input>
+                                        </lightning-layout-item>
+                                    </li>
+                                </template>
+                                <!--MaterialDescription-->
+                                <template if:true={jaFields}>
+                                    <li>
+                                        <lightning-layout-item flexibility="auto">
+                                            <lightning-input data-id="reset" class="inp" type="text" name="input20" label={label.QS_Product_Name} onkeypress={keycheck}  onchange={handlejaMatDesc} placeholder="ex: JA Description"></lightning-input>
+                                        </lightning-layout-item>
+                                    </li>
+                                </template>
+                                <!--Brand Description-->
+                                <li>
+                                    <lightning-layout-item flexibility="auto">
+                                        <lightning-input data-id="reset" class="inp" type="text" name="input3" label={label.QS_Brand} onkeypress={keycheck} onchange={handleBrandDesc}  placeholder="ex: DYMO"></lightning-input>
+                                    </lightning-layout-item>
+                                </li>
+                                <!--EAN/UPC-->
+                                <li>
+                                    <lightning-layout-item flexibility="auto">
+                                        <lightning-input data-id="reset" class="inp" type="text" name="input4" label={label.QS_EAN_UPC} onkeypress={keycheck}  onchange={handleUPC}  placeholder="ex: 00071701056573"></lightning-input>
+                                    </lightning-layout-item>
+                                </li>
+                                <template if:true={rcpBrand}>
+                                        <!--Catalog # RCP Only-->
+                                        <li>
+                                            <lightning-layout-item flexibility="auto">
+                                                <lightning-input data-id="reset" class="inp" type="text" name="input5" label={label.QS_Catalog_Number} onkeypress={keycheck}  onchange={handleproductCatalogNumber} placeholder="ex: YC1591091" > </lightning-input>
+                                            </lightning-layout-item>
+                                        </li>
+                                </template>
+                                <!--Model Number-->
+                                <li>
+                                    <lightning-layout-item flexibility="auto">
+                                        <lightning-input data-id="reset" class="inp" type="text" name="input6" label={label.QS_Model_Number} onkeypress={keycheck}  onchange={handleModelNumber}  placeholder="ex: BB15"></lightning-input>
+                                    </lightning-layout-item>
+                                </li>
+                                <template if:true={techApparelBrand}>
+                                        <!--Product Color Tech Apparel Only-->
+                                        <li>
+                                            <lightning-layout-item flexibility="auto">
+                                                <lightning-input data-id="reset" class="inp" type="text" name="input7" label={label.QS_Color} onkeypress={keycheck}  onchange={handleColor}  placeholder="ex: Green"></lightning-input>
+                                            </lightning-layout-item>
+                                        </li>
+                                        <!--Product Size Tech Apparel Only-->
+                                        <li>
+                                            <lightning-layout-item flexibility="auto">
+                                                <lightning-input data-id="reset" class="inp" type="text" name="input8" label={label.QS_Size} onkeypress={keycheck}  onchange={handleSize}  placeholder="ex: XL"></lightning-input>
+                                            </lightning-layout-item>
+                                        </li>
+                                </template>
+                                <!--Region-->
+                                <li>
+                                    <lightning-layout-item flexibility="auto">
+                                        <lightning-input data-id="reset" class="inp" type="text" name="input9" label={label.QS_Region} onkeypress={keycheck}  onchange={handleRegion}  placeholder="ex: EMEA"></lightning-input>
+                                    </lightning-layout-item>
+                                </li>
+                                <!--Material Status-->
+                                <li>
+                                    <lightning-layout-item flexibility="auto">
+                                        <lightning-input data-id="reset" class="inp" type="text" name="input10" label={label.QS_Material_Status} onkeypress={keycheck}  onchange={handleMaterialStatus}  placeholder="ex: 25"></lightning-input>
+                                    </lightning-layout-item>
+                                </li>
+                                <!--Product Record Type-->
+                                <li>
+                                    <lightning-layout-item flexibility="auto">
+                                        <lightning-combobox
+                                            data-id="reset"
+                                            class="inp"
+                                            name="input11"
+                                            label={label.Record_Type_RecordChooser_NWL}
+                                            value={value}
+                                            placeholder="choose one..."
+                                            options={options}
+                                            onchange={handleproductRT}
+                                            onkeypress={keycheck} >
+                                        </lightning-combobox>                                        
+                                    </lightning-layout-item>
+                                </li>
+
+                                <!--Web Product Name-->
+                                <li>
+                                    <lightning-layout-item flexibility="auto">
+                                        <lightning-input data-id="reset" class="inp" type="text" name="input12" label={label.QS_Web_Product_Name} onkeypress={keycheck}  onchange={handlewebProductName} placeholder="ex: LabelWriter 450" > </lightning-input>
+                                    </lightning-layout-item>
+                                </li>
+                                <!--Consumer Product Name-->
+                                <li>
+                                    <lightning-layout-item flexibility="auto">
+                                        <lightning-input data-id="reset" class="inp" type="text" name="input13" label={label.QS_Consumer_Product_Name} onkeypress={keycheck}  onchange={handleConsumerProductName} placeholder="ex: LabelWriter 450" > </lightning-input>
+                                    </lightning-layout-item>
+                                </li>
+                                <!--Category-->
+                                <li>
+                                    <lightning-layout-item flexibility="auto">
+                                        <lightning-input data-id="reset" class="inp" type="text" name="input14" label={label.QS_Category} onkeypress={keycheck}  onchange={handleproductCategory} placeholder="ex: LabelWriter - Current Range" > </lightning-input>
+                                    </lightning-layout-item>
+                                </li>
+                                <!--Country-Language-->
+                                <li>
+                                    <lightning-layout-item flexibility="auto">
+                                        <lightning-input data-id="reset" class="inp" type="text" name="input15" label={label.QS_Country_Language} onkeypress={keycheck}  onchange={handleproductCountryLanguage} placeholder="ex: CA/US" > </lightning-input>
+                                    </lightning-layout-item>
+                                </li>
+                                <!--Material Type-->
+                                <li>
+                                    <lightning-layout-item flexibility="auto">
+                                        <lightning-input data-id="reset" class="inp" type="text" name="input16" label={label.QS_Material_Type} onkeypress={keycheck}   onchange={handlematerialType} placeholder="ex: ZFIN" > </lightning-input>
+                                    </lightning-layout-item>
+                                </li>
+                                <!--Mold Number-->
+                                <li>
+                                    <lightning-layout-item flexibility="auto">
+                                        <lightning-input data-id="reset" class="inp" type="text" name="input17" label={label.QS_Mold_Number} onkeypress={keycheck}  onchange={handleproductMoldNumber} placeholder="ex: 1V30" > </lightning-input>
+                                    </lightning-layout-item>
+                                </li>
+                                <!--Old Mat #-->
+                                <li>
+                                    <lightning-layout-item flexibility="auto">
+                                        <lightning-input data-id="reset" class="inp" type="text" name="input18" label={label.QS_Old_Material_Number} onkeypress={keycheck}  onchange={handleoldMatNumber} placeholder="ex: 13290" > </lightning-input>
+                                    </lightning-layout-item>
+                                </li>
+                                <!--Divison-->
+                                <li>
+                                    <lightning-layout-item flexibility="auto">
+                                        <lightning-input data-id="reset" class="inp" type="text" name="input19" label={label.QS_Division} onkeypress={keycheck}  onchange={handleproductDivision} placeholder="ex: 03" > </lightning-input>
+                                    </lightning-layout-item>
+                                </li>
+                            </ul>
+                    </div>
+                    <!--results-->   
+                            <div class="slds-col slds-size_2-of-3 bt-test slds-p-right_medium" >
+                                <template if:true={displayResults}>                       
+                                        <lightning-layout class="slds-col card-container" horizontal-align="stretch"  multiple-rows="true" pull-to-boundary="small">
+                                            <template for:each={products} for:item="product">
+                                                <lightning-layout-item key={product.Id} flexibility="auto" class="slds-var-p-around_x-small">
+                                                    <c-product-tile product={product} case={caseId} jalang={jaFields} > </c-product-tile>
+                                                </lightning-layout-item>
+                                            </template>
+                                        </lightning-layout>
+                                </template>
+                                <template if:true={displayError}>                       
+                                    <div class="slds-text-align_center slds-text-color_error slds-text-body_regular">{message}</div>
+                                </template>
+                            </div>
+                </div>
+
+
+                <!--spinner-->
+                <template if:true={displaySpinner}>
+                        <lightning-spinner alternative-text="Loading" size="small"></lightning-spinner>
+                </template>
+
+                <!-- Modal/Popup Box LWC footer starts here -->
+                
+                <footer class="slds-modal__footer">
+
+                    <!--search button-->
+                    <button class="slds-button slds-button_neutral slds-m-left_medium" title="Search" onclick={searchForProducts} >{label.QS_Search}</button>
+
+                    <!--reset button-->
+                    <button class="slds-button slds-button_neutral slds-m-left_medium" title="Reset" onclick={handleReset} >{label.QC_Reset}</button>
+
+                    <!--close button-->
+                    <button class="slds-button slds-button_neutral" onclick={closeModal} title="Close">{label.Cancel_Createworkorderproduct}</button>
+
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+ </template>

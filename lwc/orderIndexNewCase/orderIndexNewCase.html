@@ -1,0 +1,37 @@
+<!-- sldsValidatorIgnore -->
+<template>
+    <!-- lightning button for open modal window -->
+    <lightning-button
+       label="New Case"
+       title="New Case"
+       onclick={openModal}
+       class="slds-m-right_x-small">
+    </lightning-button>
+    <!--Use template if:true to display/hide popup based on isModalOpen value--> 
+    <template if:true={isModalOpen}>
+        <!-- Modal/Popup Box LWC starts here -->
+        <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+                <!-- Modal/Popup Box LWC header here -->
+                <header class="slds-modal__header">
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={closeModal}>
+                        <lightning-icon icon-name="utility:close"
+                            alternative-text="close"
+                            variant="inverse"
+                            size="small" ></lightning-icon>
+                        <span class="slds-assistive-text">Close</span>
+                    </button>
+                    <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">Create New Case</h2>
+                </header>
+                <!-- Search inputs -->
+                <div class="slds-modal__content">
+                    <template if:true={orderId}>
+                        <c-consumer-quick-case order-id={orderId} selected-contact={contactId} onclose={closeModal}></c-consumer-quick-case>
+                    </template>
+                </div>
+               
+                </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+ </template>

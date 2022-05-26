@@ -1,0 +1,16 @@
+<template>
+    <template if:true={showPopup}>
+        <template if:true={isCase}>
+            <template if:true={oms}>
+                <c-oms-create-order case-id={recId} oncancel={handleClose}></c-oms-create-order>
+            </template>    
+            <template if:true={sales}>
+                <c-oms-create-sales-order case-id={recId} oncancel={handleClose}></c-oms-create-sales-order>   
+            </template>
+        </template>
+        <template if:false={isCase}>
+            <c-oms-create-order case-id={recId} oncancel={handleClose}></c-oms-create-order>
+        </template>
+    </template>        
+    <lightning-button label="Create Order" title="Create Order" onclick={handleCreateReturn} class="slds-m-right_x-small"></lightning-button>
+</template>

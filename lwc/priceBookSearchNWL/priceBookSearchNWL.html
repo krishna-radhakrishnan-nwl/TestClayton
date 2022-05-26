@@ -1,0 +1,79 @@
+<template>
+    
+    <div style="display:none;position: absolute;opacity:0" class="ModelTooltip" data-id="disPricebookModelToolTip">
+        <c-compact-layout-on-hover-n-w-l record-id={previewRecordId} s-object-name='Pricebook2' s-object-label='Price Book'>
+        </c-compact-layout-on-hover-n-w-l>
+    </div>
+
+    <div class="slds-m-bottom_x-small" style="margin-right:6px">
+        <span class="slds-form-element__label" style="color: var(--lwc-colorTextLabel,rgb(62, 62, 60))">Price Book</span>
+        <div class="slds-form-element__control">
+            <div data-id={htmlAttribute} class="slds-combobox__form-element slds-input-has-icon slds-input-has-icon_right" onmouseover={handleMouseover} onmouseout={handleMouseout}>
+                <template if:true={isContactBlank}>
+                    <input type="password" name="password" autocomplete="user-password"  style="display:none"/>
+                    <div style="display: flex">
+                        <input type="text" class="slds-input slds-combobox__input" data-id="inputbox" role="combobox" 
+                            value={searchText}
+                            placeholder='Enter text to search Quotes...' 
+                            onkeyup={lookupContact} 
+                            onclick={displayContactOption} 
+                            onblur={hideContactOption}
+                            onkeypress={keycheck}
+                        />
+                        <div class="slds-input__icon-group slds-input__icon-group_right" style="right:10%" if:true={showSpinner}>
+                            <div role="status" class="slds-spinner slds-spinner_small slds-spinner_brand">
+                                <span class="slds-assistive-text">Loading</span>
+                                <div class="slds-spinner__dot-a"></div>
+                                <div class="slds-spinner__dot-b"></div>
+                            </div>
+                        </div>
+                        <span onkeypress={keycheck}>
+                            <button class="slds-button slds-button_icon slds-input__icon slds-input__icon_right" title="Search Contact">
+                                <lightning-icon icon-name="utility:search" size="x-small" alternative-text="close icon" onclick={handleIconClick}>
+                                </lightning-icon> 
+                            </button>
+                        </span>
+                    </div>
+                </template>    
+                <template if:false={isContactBlank}>
+                    <span class="slds-pill slds-pill_link fullWidth">
+                        <a href="javascript:void(0);" class="slds-pill__action slds-p-left_x-small" title={selectedContact.Name}>
+                            <lightning-icon icon-name='standard:pricebook' variant='success' size="x-small">
+                            </lightning-icon>
+                            <span class="slds-pill__label slds-p-left_x-small">{selectedContact.Name}</span>
+                        </a>
+                        <span onkeypress={keycheck}>
+                            <button onclick={clearSelection} class="slds-button slds-button_icon slds-button_icon slds-pill__remove" title="Remove">
+                                <lightning-icon icon-name="utility:close" size="small" alternative-text="Press delete or backspace to remove">
+                                </lightning-icon>
+                                <span class="slds-assistive-text">Remove</span>
+                            </button>
+                        </span>
+                    </span>
+                </template>
+                <template if:true={showContactOption}>
+                    <div id="listbox-unique-id" role="listbox" class="slds-dropdown slds-dropdown_length-5 slds-dropdown_fluid" onscroll={displayContactOption}>
+                        <ul class="slds-listbox slds-listbox_vertical" role="presentation" style="overflow-x:auto">
+                            <template for:each={displayContactList} for:item=eachContact for:index=ind>
+                                <li key={eachContact.Id} role="presentation" class="slds-listbox__item" data-selectedindex={ind} onclick={handleSelection}>
+                                    <span class="slds-media slds-listbox__option slds-listbox__option_entity slds-listbox__option_has-meta" role="option">
+                                        <span class="slds-media__figure optionIcon">
+                                            <span class="slds-icon_container">
+                                                <lightning-icon icon-name='standard:pricebook' size="small"></lightning-icon>
+                                            </span>
+                                        </span>
+                                        <span class="slds-media__body singleRow">
+                                            <span class="optionTitle slds-listbox__option-text slds-listbox__option-text_entity">
+                                                {eachContact.Name}
+                                            </span>
+                                        </span>
+                                    </span>
+                                </li>
+                            </template>
+                        </ul>
+                    </div>
+                </template>
+            </div>
+        </div>
+    </div>
+</template>

@@ -1,0 +1,27 @@
+.fullWidth{
+    width:100%;
+    line-height:2
+}
+
+.slds-listbox__item:hover {
+    background: #d8edff;
+    text-shadow: none;
+    color: #16325c;
+}
+
+.optionIcon {
+   margin-top: 0.50rem;
+}
+
+.optionTitle{
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: block;
+    margin-bottom: 0.125rem;
+}
+
+.singleRow{
+    padding-top:5px;
+}

@@ -1,0 +1,126 @@
+.height-100{
+    height:100%;
+}
+
+.line-height-initial{
+    line-height: initial;
+}
+
+.search-err{
+    text-align: left;
+    padding: 0px 15px;
+    color: rgb(255,0,0);
+}
+
+.red{
+    color:red;
+}
+
+.err-head{
+    color: #c00;
+    font-weight: bold;
+    font-size: 15px;
+}
+.err-sec{
+    border-color: #c00;
+    border-radius: 4px;
+    background-color: #ffc;
+    border-style: solid;
+    border-width: 1px;
+    color: #000;
+    padding: 6px 8px 6px 6px;
+    margin: 0 0 4px 0;
+}
+
+.ship-addr-tbl, .order-totals-tbl, .returns-total-tbl, .adress-check-tbl{
+    line-height: var(--lwc-varSpacingMedium, 1rem);
+}
+
+.adress-check-tbl-container{
+    border: 1px solid rgb(221, 219, 218);
+    border-radius: 10px;
+    padding: 5px;
+    margin-bottom: 5px;
+}
+
+.main-data-tbl{
+    line-height: var(--lwc-spacingLarge, 1.5rem);
+}
+.width-12{
+    width:12%;
+}
+.width-18{
+    width:18%;
+}
+.width-5{
+    width:5%;
+}
+.width-20{
+    width:20%;
+}
+.width-30{
+    width:30%;
+}
+.main-data-tbl tr:first-child td, .returns-total-tbl tr:first-child td, .ship-addr-tbl tr:first-child td{
+    border-top:none;
+}
+
+.align-center{
+    text-align:center;
+    margin:auto;
+}
+
+.returns-total-tbl{
+    font-weight: 500;
+    line-height: 2rem;
+}
+
+.order-items-tbl tr>th:first-child, .order-items-tbl tr>td:first-child, .order-totals-tbl tr>td:first-child{
+    border-left: var(--lwc-borderWidthThin,1px) solid var(--lwc-colorBorder,rgb(221, 219, 218));
+}
+.order-items-tbl tr>th:last-child, .order-items-tbl tr>td:last-child, .order-totals-tbl tr>td:last-child{
+    border-right: var(--lwc-borderWidthThin,1px) solid var(--lwc-colorBorder,rgb(221, 219, 218));
+}
+
+.return-total-header{
+    background-color: rgb(243, 242, 242);
+    padding-left: 15px;  
+    line-height: 2rem;
+    font-size: initial;   
+}
+
+/* Set a fixed scrollable wrapper */
+.tableWrap {   
+    table-layout: fixed;
+    border-top: 0px;  
+}
+  /* Set header to stick to the top of the container. */
+.tableWrap thead tr th {
+    position: sticky;
+    top: 0px;
+    z-index: 999;
+    border-bottom: var(--lwc-borderWidthThin,1px) solid var(--lwc-colorBorder,#dddbda);
+    border-top: var(--lwc-borderWidthThin,1px) solid var(--lwc-colorBorder,#dddbda);
+}
+  /* If we use border,
+  we must use table-collapse to avoid
+  a slight movement of the header row */
+.tableWrap  table {
+   border-collapse: collapse;
+}
+  
+.help-text{
+    display: none; 
+ }
+.help-icon:hover + .help-text{
+     display: block;
+}
+
+:host {
+    --sds-c-accordion-summary-color-background:rgb(192 217 236); /* rgb(243, 242, 242);*/
+    --sds-c-accordion-section-spacing-block-start:6px;
+    --sds-c-accordion-section-spacing-inline-end:6px;
+    --sds-c-accordion-section-spacing-block-end:6px;
+    --sds-c-accordion-section-spacing-inline-start:6px;
+    --sds-c-accordion-section-radius-border: 4px;
+}

@@ -1,0 +1,6 @@
+<template>
+    <template if:true={showPopup}>
+        <c-oms-return-receipt-popup ord-number={orderNumber} rma-num={rmaNumber} oncancel={handleClose}></c-oms-return-receipt-popup>
+    </template>        
+    <lightning-button label="OMS Return Receiept" title="OMS Return Receiept" onclick={handleReturnReceipt} class="slds-m-right_x-small"></lightning-button>
+</template>

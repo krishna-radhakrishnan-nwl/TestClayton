@@ -1,0 +1,6 @@
+<template>
+    <template if:true={showSpinner}>
+        <lightning-spinner variant="brand" alternative-text="Loading" size="medium"></lightning-spinner>        
+    </template>     
+    <lightning-button label={label.ShipmentLabel} title={label.ShipmentLabel} onclick={handleShipmentLabel} class="slds-m-right_x-small"></lightning-button>
+</template>

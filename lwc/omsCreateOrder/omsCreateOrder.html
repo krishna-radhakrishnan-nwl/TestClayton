@@ -1,0 +1,1561 @@
+<!-- sldsValidatorIgnore -->
+<!-- sldsValidatorIgnore -->
+<template>
+    <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open slds-modal_large"
+        aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1">
+        <div class="slds-modal__container slds-is-relative" style="width: 96%;">
+            <template if:true={showSpinner}>
+                <lightning-spinner variant="brand" alternative-text="Loading" size="medium"></lightning-spinner>
+            </template>
+            <header class="slds-modal__header" style="border-bottom: 4px solid rgb(152 199 236);"> 
+                <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse"
+                    onclick={closePopup} title="Close">
+                    <lightning-icon icon-name="utility:close" alternative-text="Close" title="Close"  variant="inverse" size="small"></lightning-icon>
+                </button>
+                <h2 id="modal-heading-01" class="slds-modal__title slds-hyphenate">Create OMS Order</h2>
+            </header>
+            <div class="slds-modal__content slds-p-around_small height-100" id="modal-content-id-1">                               
+                <template if:true={dataoms}>
+                    <div class="error-panel">
+                        <template if:true={dataoms.isError}>  
+                            <div class="err-sec">
+                                <div class="err-head">Errors</div> 
+                                <ul class="slds-list_dotted" style="list-style: disc;line-height: initial;">                                
+                                    <template for:each={dataoms.errorList} for:item="error">
+                                        <li key={error}>{error}</li>
+                                    </template>
+                                </ul> 
+                            </div>                                                      
+                        </template>
+                        <template if:true={dataoms.isSuccess}>  
+                            <div class="err-sec" style="border-color: green;">
+                                <div class="err-head" style="color: green;">Success</div> 
+                                <ul class="slds-list_dotted" style="list-style: disc;line-height: initial;">                                                                    
+                                    <li><a href="#" onclick={openSuccRecord}>{dataoms.orderNumber}</a> order created successfully!</li>                                   
+                                </ul> 
+                            </div>                                                      
+                        </template>
+                    </div>                  
+                </template>                                        
+                <lightning-accordion class="create-ret-pop-header" allow-multiple-sections-open
+                    onsectiontoggle={handleSectionToggle} active-section-name={activeSections}>
+                    <lightning-accordion-section name="A" class="create-ret-pop-sec" label="Order Header Selection">
+                        <template if:true={dataoms}>
+                            <table
+                                class="slds-table slds-table_cell-buffer slds-no-row-hover slds-table_header-hidden slds-table_bordered main-data-tbl slds-m-bottom_x-small slds-is-relative"
+                                aria-label="Order Totals">
+                                <template if:true={showHeaderSpinner}>
+                                    <lightning-spinner variant="brand" alternative-text="Loading" size="small">
+                                    </lightning-spinner>
+                                </template>
+                                <tbody>
+                                    <tr class="slds-hint-parent">
+                                        <td class="width-12">
+                                            <div title="Brand" class="slds-form-element__label">Brand</div>
+                                        </td>
+                                        <td class="width-18 slds-cell-wrap">
+                                            <template if:false={dataoms.isContact}>
+                                                <div class="slds-form-element__static">{dataoms.brand}</div>
+                                            </template>
+                                            <template if:true={dataoms.isContact}>
+                                                <lightning-combobox variant="label-hidden" name="brand"
+                                                value={dataoms.brand} placeholder="Select" options={brands}
+                                                onchange={updateBrand} disabled={dataoms.brandSelected}>
+                                            </lightning-combobox>
+                                            </template>
+                                        </td>
+                                        <td class="width-5"></td>
+                                        <td class="width-12">
+                                            <div title="Sub Brand" class="slds-form-element__label">Sub Brand</div>
+                                        </td>
+                                        <td class="width-18 slds-cell-wrap">
+                                            <template if:false={dataoms.isContact}>
+                                                <div class="slds-form-element__static">{dataoms.subBrand}</div>
+                                            </template>
+                                            <template if:true={dataoms.isContact}>
+                                                <lightning-combobox variant="label-hidden" name="subBrand"
+                                                value={dataoms.subBrand} placeholder="Select" options={subBrands}
+                                                onchange={updateSubBrand} disabled={dataoms.brandSelected}>
+                                            </lightning-combobox>
+                                            </template>
+                                        </td>
+                                        <td class="width-5"></td>
+                                        <td class="width-12">
+                                            <div title="Order Type" class="slds-form-element__label">Order Type</div>
+                                        </td>
+                                        <td class="width-18 slds-cell-wrap">
+                                            <lightning-combobox variant="label-hidden" name="OrderType"
+                                                value={dataoms.selectedOrderType} placeholder="Select" options={orderTypes}
+                                                onchange={setOrderType} disabled={dataoms.brandSelected}>
+                                            </lightning-combobox>
+                                        </td>
+                                        <td>
+                                            <template if:false={dataoms.brandSelected}>
+                                                <lightning-button label="Next" class="slds-m-left_x-small"
+                                                    onclick={loadOrderForm}></lightning-button>
+                                            </template>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </template>
+                    </lightning-accordion-section>
+                    <template if:true={isBrandSelected}>
+                        <template if:true={dataoms.brandSelected}>
+                            <lightning-accordion-section name="B" class="create-ret-pop-sec slds-m-top_x-small"
+                                label="Order Header Data">
+                                <lightning-tabset class="active-tab-value" active-tab-value={actveTab}>
+                                    <lightning-tab class="slds-p-top_x-small" label="Main Data" value="one">
+                                        <table
+                                            class="slds-table slds-table_cell-buffer slds-no-row-hover slds-table_header-hidden slds-table_bordered main-data-tbl"
+                                            aria-label="Order Totals">
+                                            <tbody>
+                                                <tr class="slds-hint-parent">
+                                                    <template if:false={dataoms.isContact}>
+                                                        <td style="width:18%">
+                                                            <div title="Name" class="slds-form-element__label">Case Number
+                                                            </div>
+                                                        </td>
+                                                         <td style="width:28%" class="slds-cell-wrap">
+                                                            <template if:false={dataoms.isOrder}>
+                                                                <div class="slds-form-element__static">{dataoms.caseNumber}
+                                                                </div>
+                                                            </template>
+                                                            <template if:true={dataoms.isOrder}>
+                                                                <lightning-input class="case-num-val" name="caseNumber" id="caseNumber"
+                                                                type="text" variant="label-hidden" value={dataoms.caseNumber}>
+                                                            </lightning-input>
+                                                            </template>
+                                                        </td>
+                                                    </template>
+                                                    <template if:true={dataoms.isContact}>
+                                                        <td style="width:18%">
+                                                            <div title="Name" class="slds-form-element__label">Contact Name
+                                                            </div>
+                                                        </td>
+                                                         <td style="width:28%" class="slds-cell-wrap">
+                                                            <div class="slds-form-element__static">{dataoms.conAddrFullName}
+                                                            </div>
+                                                         </td> 
+                                                    </template>
+                                                   
+                                                    <td style="width:8%"></td>
+                                                    <td style="width:18%">
+                                                        <div title="Site Code" class="slds-form-element__label">
+                                                            Site Code</div>
+                                                    </td>
+                                                    <td style="width:28%">
+                                                        <div class="slds-form-element__static">{dataoms.siteCode}</div>
+                                                    </td>
+                                                </tr>
+                                                <tr class="slds-hint-parent">
+                                                    <td>
+                                                        <div class="slds-form-element__label" title="Brand">Shipping
+                                                            Method</div>
+                                                    </td>
+                                                    <td class="slds-cell-wrap">
+                                                        <lightning-combobox variant="label-hidden" name="shippingMethod"
+                                                            placeholder="Select" options={shippingMethods}
+                                                            value={dataoms.selectedShippingMethod}
+                                                            onchange={setSelectedOption}>
+                                                        </lightning-combobox>
+                                                    </td>
+                                                    <td></td>
+                                                    <td>
+                                                        <div class="slds-form-element__label" title="Web Customer Id">
+                                                            Web Customer Id</div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="slds-form-element__static">{dataoms.webCustomerId}
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                   <!-- Order Reason -->
+                                                <template if:true={dataoms.enableOrderReason}>
+                                                    <tr class="slds-hint-parent">
+                                                            <td>
+                                                                <div class="slds-form-element__label" title="Order Reason">Order
+                                                                    Reason</div>
+                                                            </td>
+                                                            <td class="slds-cell-wrap">
+                                                                <lightning-combobox variant="label-hidden" name="orderReason"
+                                                                    placeholder="Select" options={orderReasons}
+                                                                    value={dataoms.selectedOrderReason}
+                                                                    onchange={setSelectedOption}>
+                                                                </lightning-combobox>
+                                                            </td>
+                                                            <td></td>
+                                                            <td></td>
+                                                            <td></td>
+                                                        </tr>
+                                                </template>
+                                                <tr class="slds-hint-parent">
+                                                    <td>
+                                                        <div class="slds-form-element__label" title="Shipping Notes">Shipping
+                                                            Notes
+                                                        </div>
+                                                    </td>
+                                                    <td class="slds-cell-wrap">
+                                                        <lightning-textarea name="shippingNotes"
+                                                            class="shipping-notes-val" variant="label-hidden"
+                                                            value={dataoms.shippingNotes}></lightning-textarea>
+                                                    </td>
+                                                    <td></td>
+                                                    <td>
+                                                        <div class="slds-form-element__label" title="SAP Brand">
+                                                            SAP Brand
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="slds-form-element__static">{dataoms.sapBrand}</div>
+                                                    </td>
+                                                </tr>
+                                                <tr class="slds-hint-parent">
+                                                    <template if:false={isSimOrderGrossTotal}>
+                                                        <td></td>
+                                                        <td></td>
+                                                    </template>
+                                                    <template if:true={isSimOrderGrossTotal}>
+                                                        <td>
+                                                            <div class="slds-form-element__label"
+                                                                title="Send Payment Email">Send Payment Email</div>
+                                                        </td>
+                                                        <td>
+                                                            <lightning-input type="checkbox" class="send-pay-email-chk"
+                                                                variant="label-hidden" onchange={loadPaymentFrame}
+                                                                name="refundShip" value={dataoms.sendPaymentEmail}
+                                                                checked={dataoms.sendPaymentEmail}>
+                                                            </lightning-input>
+                                                        </td>
+                                                    </template>
+                                                    <td></td>
+                                                    <td>
+                                                        <div class="slds-form-element__label" title="Waive Shipping">
+                                                            Waive Shipping</div>
+                                                    </td>
+                                                    <td>
+                                                        <lightning-input type="checkbox" variant="label-hidden"
+                                                            onchange={setSelectedBox} name="waiveShipping"
+                                                            value={dataoms.waiveShipping}>
+                                                        </lightning-input>
+                                                    </td>
+                                                </tr>
+                                                <tr class="slds-hint-parent">
+                                                    <td>
+                                                        <div class="slds-form-element__label" title="OMS Site Code">
+                                                            Consumer Credit</div>
+                                                    </td>
+                                                    <td class="slds-cell-wrap">                                                       
+                                                        <lightning-formatted-number value={dataoms.consumerCredit} minimum-fraction-digits="2"></lightning-formatted-number>
+                                                    </td>
+                                                    <td></td>
+                                                    <td>
+                                                        <div class="slds-form-element__label" title="Generate Label">
+                                                            Apply Credit</div>
+                                                    </td>
+                                                    <td>
+                                                        <lightning-input type="checkbox" variant="label-hidden"
+                                                            onchange={setSelectedBox} name="applyCredit"
+                                                            value={dataoms.applyCredit} checked={dataoms.applyCredit} >
+                                                        </lightning-input>
+                                                    </td>
+                                                </tr>
+                                                <template if:true={dataoms.showOrderBlock}>
+                                                    <tr class="slds-hint-parent">
+                                                        <td></td>
+                                                        <td></td>
+                                                        <td></td>
+                                                        <td>
+                                                            <div class="slds-form-element__label" title="Hold Order">Hold Order
+                                                                 <span style="padding-left:1rem;padding-top:5rem;position:relative;min-width: max-content;">
+                                                                    <lightning-icon class="help-icon" icon-name="utility:info" size="xx-small"></lightning-icon>                                                                                                                                   
+                                                                    <div class="help-text slds-popover slds-popover_tooltip slds-nubbin_bottom-left" role="tooltip" id="help"
+                                                                        style="position:absolute;top:-20px;left:0px;min-width: max-content;">
+                                                                        <div class="slds-popover__body">
+                                                                            <ul style="list-style-type:disc;padding-left: 10px;">
+                                                                                <li>Blank - Continue with normal process</li>
+                                                                                <li>PPSL Checkpoint - Hold order until PPSL Checkpoint is reached</li>
+                                                                                <li>Manager Approval - Hold order until approved</li>
+                                                                            </ul>
+                                                                        </div>
+                                                                    </div>
+                                                                </span>   
+                                                            </div>
+                                                        </td>
+                                                        <td class="slds-cell-wrap">
+                                                            <!--<lightning-input type="checkbox" variant="label-hidden"
+                                                                onchange={setOrderBlock} name="orderBlock"
+                                                                value={dataoms.showOrderBlock}>
+                                                            </lightning-input>-->
+                                                            <lightning-combobox variant="label-hidden" name="holdProductReturn"
+                                                                placeholder="Select" options={holdProductReturn}
+                                                                value={dataoms.selectedProductReturnVal}
+                                                                onchange={setHoldProductReturn}>
+                                                            </lightning-combobox>
+                                                        </td>                                                           
+                                                    </tr>
+                                                </template>
+                                            </tbody>
+                                        </table>
+                                    </lightning-tab>
+                                    <lightning-tab label="Shipping/Billing Address" onactive={handleAdressActive} title="Shipping/Billing Address"
+                                        value="two">
+                                        <div class="adress-check-tbl-container">
+                                            <table
+                                                class="slds-table slds-table_cell-buffer slds-no-row-hover slds-table_header-hidden adress-check-tbl">
+                                                <tr>
+                                                    <td style="width:35%;">
+                                                        <lightning-input type="checkbox" onchange={cbShpAddr}
+                                                            class="cb-ship-addr" label="Shipping Address"
+                                                            name="shipAddr" id="shipAddr" checked={dataoms.shpAddr}></lightning-input>
+                                                    </td>
+                                                    <td style="width:34%;">
+                                                        <lightning-input type="checkbox" onchange={cbConAddr}
+                                                            class="cb-con-ship-addr" label="Contact Shipping Address"
+                                                            name="conShipAddr" id="conShipAddr"></lightning-input>
+                                                    </td>
+                                                    <td>
+                                                        <lightning-input type="checkbox" onchange={ccAddressFill}
+                                                            class="use-ship-addr" label="Use Shipping Address"
+                                                            name="useShipAddr" id="useShipAddr"></lightning-input>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td></td>
+                                                    <td>
+                                                        <lightning-input type="checkbox" onchange={updateConAddr}
+                                                            label="Update Contact Address" class="update-con-addr"
+                                                            name="updateConAddr" id="updateConAddr"></lightning-input>
+                                                    </td>
+                                                    <td>
+                                                        <lightning-input type="checkbox" onchange={ccAddressFill}
+                                                            label="Use Contact Address" class="use-con-addr"
+                                                            name="useConAddr" id="useConAddr"></lightning-input>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td>
+                                                        <lightning-input type="checkbox" onchange={ccAddressFill}
+                                                            label="New Billing Address" class="new-bill-addr"
+                                                            name="newBillAddr" id="newBillAddr" checked={dataoms.ccBillAddr}></lightning-input>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                        <table
+                                            class="slds-table slds-table_cell-buffer slds-table_header-hidden slds-no-row-hover slds-table_bordered ship-addr-tbl"
+                                            aria-label="Shipping/Billing Address">
+                                            <tbody>
+                                                <tr class="slds-hint-parent">
+                                                    <td data-label="Country Code">
+                                                        <div class="slds-form-element__label" title="Country Code">
+                                                            Country Code</div>
+                                                    </td>
+                                                    <td class="slds-cell-wrap">
+                                                        <lightning-input class="ship-cc-val" name="CountryCode" id="CountryCode" 
+                                                            type="text" variant="label-hidden"
+                                                            value={dataoms.shpAddrCountry}>
+                                                        </lightning-input>
+                                                    </td>
+                                                    <td></td>
+                                                    <td data-label="Country Code">
+                                                        <div class="slds-form-element__label" title="Country Code">
+                                                            Country Code</div>
+                                                    </td>
+                                                    <td class="slds-cell-wrap">
+                                                        <lightning-input class="con-cc-val" name="CountryCode" id="CountryConCode"
+                                                            type="text" variant="label-hidden"
+                                                            value={dataoms.conAddrCountry}>
+                                                        </lightning-input>
+                                                    </td>
+                                                    <td></td>
+                                                    <td data-label="Country Code">
+                                                        <div class="slds-form-element__label" title="Country Code">
+                                                            Country Code</div>
+                                                    </td>
+                                                    <td class="slds-cell-wrap">
+                                                        <lightning-input class="billing-addr-field bill-cc-val"
+                                                            name="CountryCode" id="CountryBillCode" type="text" variant="label-hidden"
+                                                            value={dataoms.ccAddrCountry}>
+                                                        </lightning-input>
+                                                    </td>
+                                                </tr>
+                                                <tr class="slds-hint-parent">
+                                                    <td data-label="First Name">
+                                                        <div class="slds-form-element__label" title="First Name">
+                                                        First Name
+                                                        </div>
+                                                    </td>
+                                                    <td class="slds-cell-wrap">
+                                                        <lightning-input class="ship-fn-val" name="firstName" id="firstName"
+                                                            type="text" variant="label-hidden"
+                                                            value={dataoms.shpAddrName}>
+                                                        </lightning-input>
+                                                    </td>
+                                                    <td></td>
+                                                    <td data-label="First Name">
+                                                        <div class="slds-form-element__label" title="First Name">
+                                                        First Name
+                                                        </div>
+                                                    </td>
+                                                    <td class="slds-cell-wrap">
+                                                        <lightning-input class="con-fn-val" name="firstNameCon" id="firstNameCon"
+                                                            type="text" variant="label-hidden"
+                                                            value={dataoms.conAddrName}>
+                                                        </lightning-input>
+                                                    </td>
+                                                    <td></td>
+                                                    <td data-label="First Name">
+                                                        <div class="slds-form-element__label" title="First Name">
+                                                        First Name
+                                                        </div>
+                                                    </td>
+                                                    <td class="slds-cell-wrap">
+                                                        <lightning-input class="billing-addr-field bill-fn-val"
+                                                            name="firstNameBill" id="firstNameBill" type="text" variant="label-hidden"
+                                                            value={dataoms.ccAddrName}>
+                                                        </lightning-input>
+                                                    </td>
+                                                </tr>
+                                                <tr class="slds-hint-parent">
+                                                    <td data-label="Lastv Name">
+                                                        <div class="slds-form-element__label" title="Last Name">
+                                                            Last Name
+                                                        </div>
+                                                    </td>
+                                                    <td class="slds-cell-wrap">
+                                                        <lightning-input class="ship-ln-val" name="CountryCode"
+                                                            type="text" variant="label-hidden"
+                                                            value={dataoms.shpAddrName2}>
+                                                        </lightning-input>
+                                                    </td>
+                                                    <td></td>
+                                                    <td data-label="Lastv Name">
+                                                        <div class="slds-form-element__label" title="Last Name">
+                                                            Last Name
+                                                        </div>
+                                                    </td>
+                                                    <td class="slds-cell-wrap">
+                                                        <lightning-input class="con-ln-val" name="CountryCode"
+                                                            type="text" variant="label-hidden"
+                                                            value={dataoms.conAddrName2}>
+                                                        </lightning-input>
+                                                    </td>
+                                                    <td></td>
+                                                    <td data-label="Lastv Name">
+                                                        <div class="slds-form-element__label" title="Last Name">
+                                                            Last Name
+                                                        </div>
+                                                    </td>
+                                                    <td class="slds-cell-wrap">
+                                                        <lightning-input class="billing-addr-field bill-ln-val"
+                                                            name="CountryCode" type="text" variant="label-hidden"
+                                                            value={dataoms.ccAddrName2}>
+                                                        </lightning-input>
+                                                    </td>
+                                                </tr>
+                                                <tr class="slds-hint-parent">
+                                                    <td data-label="Company Name">
+                                                        <div class="slds-form-element__label" title="Company Name">
+                                                            Company Name
+                                                        </div>
+                                                    </td>
+                                                    <td class="slds-cell-wrap">
+                                                        <lightning-input class="ship-cn-val" name="CountryCode"
+                                                            type="text" variant="label-hidden"
+                                                            value={dataoms.shpAddrCompanyName}>
+                                                        </lightning-input>
+                                                    </td>
+                                                    <td></td>
+                                                    <td data-label="Company Name">
+                                                        <div class="slds-form-element__label" title="Company Name">
+                                                            Company Name
+                                                        </div>
+                                                    </td>
+                                                    <td class="slds-cell-wrap">
+                                                        <lightning-input class="con-cn-val" name="CountryCode"
+                                                            type="text" variant="label-hidden"
+                                                            value={dataoms.conAddrCompanyName}>
+                                                        </lightning-input>
+                                                    </td>
+                                                    <td></td>
+                                                    <td data-label="Company Name">
+                                                        <div class="slds-form-element__label" title="Company Name">
+                                                            Company Name
+                                                        </div>
+                                                    </td>
+                                                    <td class="slds-cell-wrap">
+                                                        <lightning-input class="billing-addr-field bill-cn-val"
+                                                            name="CountryCode" type="text" variant="label-hidden"
+                                                            value={dataoms.ccAddrCompanyName}>
+                                                        </lightning-input>
+                                                    </td>
+                                                </tr>
+                                                <tr class="slds-hint-parent">
+                                                    <td data-label="Street">
+                                                        <div class="slds-form-element__label" title="Street">Street
+                                                        </div>
+                                                    </td>
+                                                    <td class="slds-cell-wrap">
+                                                        <lightning-input class="ship-st-val" name="shipStreet" id="shipStreet"
+                                                            type="text" variant="label-hidden"
+                                                            value={dataoms.shpAddrStreet}>
+                                                        </lightning-input>
+                                                    </td>
+                                                    <td></td>
+                                                    <td data-label="Street">
+                                                        <div class="slds-form-element__label" title="Street">Street
+                                                        </div>
+                                                    </td>
+                                                    <td class="slds-cell-wrap">
+                                                        <lightning-input class="con-st-val" name="conStreet" id="conStreet"
+                                                            type="text" variant="label-hidden"
+                                                            value={dataoms.conAddrStreet}>
+                                                        </lightning-input>
+                                                    </td>
+                                                    <td></td>
+                                                    <td data-label="Street">
+                                                        <div class="slds-form-element__label" title="Street">Street
+                                                        </div>
+                                                    </td>
+                                                    <td class="slds-cell-wrap">
+                                                        <lightning-input class="billing-addr-field bill-st-val"
+                                                            name="billStreet" id="billStreet" type="text" variant="label-hidden"
+                                                            value={dataoms.ccAddrStreet}>
+                                                        </lightning-input>
+                                                    </td>
+                                                </tr>
+                                                <tr class="slds-hint-parent">
+                                                    <td data-label="City">
+                                                        <div class="slds-form-element__label" title="City">City</div>
+                                                    </td>
+                                                    <td class="slds-cell-wrap">
+                                                        <lightning-input class="ship-ct-val" name="shipCt" id="shipCt"
+                                                            type="text" variant="label-hidden"
+                                                            value={dataoms.shpAddrCity}>
+                                                        </lightning-input>
+                                                    </td>
+                                                    <td></td>
+                                                    <td data-label="City">
+                                                        <div class="slds-form-element__label" title="City">City</div>
+                                                    </td>
+                                                    <td class="slds-cell-wrap">
+                                                        <lightning-input class="con-ct-val" name="conCt" id="conCt"
+                                                            type="text" variant="label-hidden"
+                                                            value={dataoms.conAddrCity}>
+                                                        </lightning-input>
+                                                    </td>
+                                                    <td></td>
+                                                    <td data-label="City">
+                                                        <div class="slds-form-element__label" title="City">City</div>
+                                                    </td>
+                                                    <td class="slds-cell-wrap">
+                                                        <lightning-input class="billing-addr-field bill-ct-val" 
+                                                            name="billCt" id="billCt" type="text" variant="label-hidden"
+                                                            value={dataoms.ccAddrCity}>
+                                                        </lightning-input>
+                                                    </td>
+                                                </tr>
+                                                <tr class="slds-hint-parent">
+                                                    <td data-label="State">
+                                                        <div class="slds-form-element__label" title="State">
+                                                            State/Province Code</div>
+                                                    </td>
+                                                    <td class="slds-cell-wrap">
+                                                        <lightning-input class="ship-sc-val" name="shipState"
+                                                            type="text" id="shipState" variant="label-hidden"
+                                                            value={dataoms.shpAddrState}>
+                                                        </lightning-input>
+                                                    </td>
+                                                    <td></td>
+                                                    <td data-label="State">
+                                                        <div class="slds-form-element__label" title="State">
+                                                            State/Province Code</div>
+                                                    </td>
+                                                    <td class="slds-cell-wrap">
+                                                        <lightning-input class="con-sc-val" name="conState" id="conState"
+                                                            type="text" variant="label-hidden"
+                                                            value={dataoms.conAddrState}>
+                                                        </lightning-input>
+                                                    </td>
+                                                    <td></td>
+                                                    <td data-label="State">
+                                                        <div class="slds-form-element__label" title="State">State Code
+                                                        </div>
+                                                    </td>
+                                                    <td class="slds-cell-wrap">
+                                                        <lightning-input class="billing-addr-field bill-sc-val"
+                                                            name="billState" id="billState" type="text" variant="label-hidden"
+                                                            value={dataoms.ccAddrState}>
+                                                        </lightning-input>
+                                                    </td>
+                                                </tr>
+                                                <tr class="slds-hint-parent">
+                                                    <td data-label="Zip/Postal Code">
+                                                        <div class="slds-form-element__label" title="Zip/Postal Code">
+                                                            Zip/Postal Code</div>
+                                                    </td>
+                                                    <td class="slds-cell-wrap">
+                                                        <lightning-input class="ship-pc-val" name="shipPc" id="shipPc" 
+                                                            type="text"  variant="label-hidden"
+                                                            value={dataoms.shpAddrZipCode}>
+                                                        </lightning-input>
+                                                    </td>
+                                                    <td></td>
+                                                    <td data-label="Zip/Postal Code">
+                                                        <div class="slds-form-element__label" title="Zip/Postal Code">
+                                                            Zip/Postal Code</div>
+                                                    </td>
+                                                    <td class="slds-cell-wrap">
+                                                        <lightning-input class="con-pc-val" name="conPc" id="conPc" 
+                                                            type="text" variant="label-hidden"
+                                                            value={dataoms.conAddrZipCode}>
+                                                        </lightning-input>
+                                                    </td>
+                                                    <td></td>
+                                                    <td data-label="Zip/Postal Code">
+                                                        <div class="slds-form-element__label" title="Zip/Postal Code">
+                                                            Zip/Postal Code</div>
+                                                    </td>
+                                                    <td class="slds-cell-wrap">
+                                                        <lightning-input class="billing-addr-field bill-pc-val"
+                                                            name="billPc" id="billPc" type="text" variant="label-hidden"
+                                                            value={dataoms.ccAddrZipCode}>
+                                                        </lightning-input>
+                                                    </td>
+                                                </tr>
+                                                <tr class="slds-hint-parent">
+                                                    <td data-label="Email">
+                                                        <div class="slds-form-element__label" title="Email">Email</div>
+                                                    </td>
+                                                    <td class="slds-cell-wrap">
+                                                        <lightning-input class="ship-mail-val" name="shipMail"
+                                                            type="text" id="shipMail" variant="label-hidden"
+                                                            value={dataoms.shpAddrEmail}>
+                                                        </lightning-input>
+                                                    </td>
+                                                    <td></td>
+                                                    <td data-label="Email">
+                                                        <div class="slds-form-element__label" title="Email">Email</div>
+                                                    </td>
+                                                    <td class="slds-cell-wrap">
+                                                        <lightning-input class="con-mail-val" name="conMail"
+                                                            type="text" id="conMail" variant="label-hidden"
+                                                            value={dataoms.conAddrEmail}>
+                                                        </lightning-input>
+                                                    </td>
+                                                    <td></td>
+                                                    <td data-label="Email">
+                                                        <div class="slds-form-element__label" title="Email">Email</div>
+                                                    </td>
+                                                    <td class="slds-cell-wrap">
+                                                        <lightning-input class="billing-addr-field bill-mail-val"
+                                                            name="CountryCode" type="text" variant="label-hidden"
+                                                            value={dataoms.ccAddrEmail}>
+                                                        </lightning-input>
+                                                    </td>
+                                                </tr>
+                                                <tr class="slds-hint-parent">
+                                                    <td data-label="Phone">
+                                                        <div class="slds-form-element__label" title="Phone">Phone</div>
+                                                    </td>
+                                                    <td class="slds-cell-wrap">
+                                                        <lightning-input class="ship-ph-val" name="CountryCode"
+                                                            type="text" variant="label-hidden"
+                                                            value={dataoms.shpAddrPhone}>
+                                                        </lightning-input>
+                                                    </td>
+                                                    <td></td>
+                                                    <td data-label="Phone">
+                                                        <div class="slds-form-element__label" title="Phone">Phone</div>
+                                                    </td>
+                                                    <td class="slds-cell-wrap">
+                                                        <lightning-input class="con-ph-val" name="CountryCode"
+                                                            type="text" variant="label-hidden"
+                                                            value={dataoms.conAddrPhone}>
+                                                        </lightning-input>
+                                                    </td>
+                                                    <td></td>
+                                                    <td data-label="Phone">
+                                                        <div class="slds-form-element__label" title="Phone">Phone</div>
+                                                    </td>
+                                                    <td class="slds-cell-wrap">
+                                                        <lightning-input class="billing-addr-field bill-ph-val"
+                                                            name="CountryCode" type="text" variant="label-hidden"
+                                                            value={dataoms.ccAddrPhone}>
+                                                        </lightning-input>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </lightning-tab>
+                                    <template if:true={showCredCard}>
+                                        <lightning-tab label="Credit Card" title="Credit Card" value="three">
+                                            <article class="slds-card" style="width:40%;">
+                                                <div class="slds-card__body slds-card__body_inner">
+                                                    <div class="slds-grid slds-wrap line-height-initial">
+                                                        <!--allowPCIPalPayment-->
+                                                        <template if:false={dataoms.allowPCIPalPayment}>                                                           
+                                                            <iframe height="425px" style="border:none;" width="100%" src={siteUrl}></iframe>                                                           
+                                                        </template>
+                                                        <template if:true={dataoms.allowPCIPalPayment}>
+                                                            <template if:true={pcIpalFrame}>
+                                                                <iframe height="600" width="600" lwc:dom="manual" name="loadIframe"></iframe>
+                                                            </template>
+                                                            <div lwc:dom="manual" class="pcipal-form-container"></div>
+                                                            <template if:true={pcIpalMessage}>
+                                                                <div class={pcIpalMessageClr} style="padding-top: 10px;padding-bottom: 10px;">{dataoms.ccTokenizedMessage}</div>
+                                                            </template>                                                                                                                        
+                                                            <template if:true={dataoms.ccIsTokenized}>
+                                                                <div
+                                                                    class="slds-col slds-size_12-of-12 slds-p-horizontal--medium slds-m-bottom--x-small slds-m-top_small align-center">
+                                                                    <button class="slds-button slds-button_neutral"
+                                                                        onclick={reTokenizeCC}>Enter new Credit Card info</button>
+                                                                </div>
+                                                            </template>                                                            
+                                                        </template>
+                                                    </div>
+                                                </div>
+                                            </article>
+                                        </lightning-tab>
+                                    </template>
+                                    <template if:true={dataoms.showGCTab}>
+                                        <lightning-tab label="Gift Card" title="Gift Card" value="four">
+                                            <article class="slds-card" style="width:40%;">
+                                                <div class="slds-card__body slds-card__body_inner">
+                                                    <div class="slds-grid slds-wrap line-height-initial">                                                                                                               
+                                                        <div
+                                                            class="slds-col slds-size_12-of-12 slds-p-horizontal--medium slds-m-bottom--x-small">
+                                                            <lightning-Input type="text" value={dataoms.gcNumber}
+                                                                label="Card Number" name="cardNumber"
+                                                                class="gift-card-input gift-number-input" required>
+                                                            </lightning-input>
+                                                        </div>
+                                                        <div
+                                                            class="slds-col slds-size_12-of-12 slds-p-horizontal--medium slds-m-bottom--x-small">
+                                                            <lightning-Input type="text" value={dataoms.gcPin}
+                                                                label="Pin" name="pin"
+                                                                class="gift-card-input gift-pin-input" required></lightning-input>
+                                                        </div>
+                                                        <div
+                                                            class="slds-col slds-size_12-of-12 slds-p-horizontal--medium slds-m-bottom--x-small">
+                                                            <lightning-Input type="text" value={dataoms.gcBalance}
+                                                                label="Balance" name="balance"
+                                                                class="gift-card-input gift-balance-input" disabled>
+                                                            </lightning-input>
+                                                        </div>                                                       
+                                                        <div
+                                                            class="slds-col slds-size_12-of-12 slds-p-horizontal--medium slds-p-top_small slds-m-bottom--x-small align-center">
+                                                            <button
+                                                                class="slds-button slds-button_neutral slds-m-right-small tokenizebtn"
+                                                                onclick={getGCBalance}>Check Balance</button>
+                                                            <button class="slds-button slds-button_neutral"
+                                                                onclick={addGiftCardToOrder}>Add</button>
+                                                        </div>                                                      
+                                                    </div>
+                                                    <template if:false={giftCardsListEmpty}>
+                                                        <table
+                                                            class="slds-table slds-table_cell-buffer slds-table_col-bordered slds-table_bordered order-items-tbl slds-m-top_large slds-m-bottom_x-small line-height-initial"
+                                                            aria-label="Gift card table" style="table-layout: fixed;">
+                                                            <thead>
+                                                                <tr class="slds-line-height_reset">
+                                                                    <th scope="col" style="width:20%">
+                                                                        <div title="Action">Action</div>
+                                                                    </th>
+                                                                    <th scope="col" style="width:30%">
+                                                                        <div title="Number">Number</div>
+                                                                    </th>
+                                                                    <th scope="col" class="slds-cell-wrap" style="width:25%">
+                                                                        <div title="Pin">Pin
+                                                                        </div>
+                                                                    </th>
+                                                                    <th scope="col" style="width:25%">
+                                                                        <div title="Balance">Balance</div>
+                                                                    </th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>                                                            
+                                                                <template for:each={dataoms.giftCardsList} for:item="gc">
+                                                                    <tr key={gc.cardNumber} class="slds-hint-parent">
+                                                                        <td class="slds-cell-wrap">
+                                                                            <img src={cross} alt="" data-id={gc.cardNumber}
+                                                                            onclick={removeGiftCardFromOrder} />
+                                                                        </td>                                                                       
+                                                                        <td class="slds-cell-wrap">                                                                          
+                                                                            <div class="slds-form-element__static">{gc.cardNumber}</div>
+                                                                        </td>
+                                                                        <td class="slds-cell-wrap">
+                                                                            <div class="slds-form-element__static">{gc.pin}</div>
+                                                                        </td>
+                                                                        <td class="slds-cell-wrap">
+                                                                            <div class="slds-form-element__static">{gc.balance}</div>
+                                                                        </td>
+                                                                    </tr>
+                                                                </template>                                                           
+                                                            </tbody>
+                                                        </table>
+                                                    </template>
+                                                </div>
+                                            </article>
+                                        </lightning-tab>
+                                    </template>
+                                </lightning-tabset>
+                            </lightning-accordion-section>
+                            <lightning-accordion-section name="C" class="create-ret-pop-sec slds-m-top_x-small"
+                                label="Order Totals">
+                                <table
+                                    class="slds-table slds-table_cell-buffer slds-no-row-hover slds-table_col-bordered slds-m-bottom_medium slds-m-top_x-small slds-table_header-hidden slds-table_bordered order-totals-tbl"
+                                    aria-label="Order Totals">
+                                    <tr class="slds-hint-parent">
+                                        <td class="width-30">
+                                            <div title="Item Total">Item Total</div>
+                                        </td>
+                                        <td>
+                                            <lightning-formatted-number value={dataoms.simMerchNetTotal} minimum-fraction-digits="2"></lightning-formatted-number>                                         
+                                        </td>
+                                    </tr>
+                                    <tr class="slds-hint-parent">
+                                        <td class="width-30">
+                                            <div title="Shipping">Shipping</div>
+                                        </td>
+                                        <td>
+                                            <lightning-formatted-number value={dataoms.simAdjShipNetTotal} minimum-fraction-digits="2"></lightning-formatted-number>                                           
+                                        </td>
+                                    </tr>
+                                    <tr class="slds-hint-parent">
+                                        <td class="width-30">
+                                            <div title="CRM Discounts">CRM Discounts</div>
+                                        </td>
+                                        <td>
+                                            - <lightning-formatted-number value={dataoms.simOrderDiscounts} minimum-fraction-digits="2"></lightning-formatted-number>                                            
+                                        </td>
+                                    </tr>
+                                    <template if:true={dataoms.enableOCAPICallout}>
+                                        <tr class="slds-hint-parent">
+                                            <td class="width-30">
+                                                <div title="Coupons/Promotions">Coupons/Promotions</div>
+                                            </td>
+                                            <td>
+                                                - <lightning-formatted-number value={dataoms.simOrderCouponSavings} minimum-fraction-digits="2"></lightning-formatted-number>                                               
+                                            </td>
+                                        </tr>
+                                    </template>
+                                    <tr class="slds-hint-parent">
+                                        <td class="width-30">
+                                            <div title="CRM Credits">CRM Credits</div>
+                                        </td>
+                                        <td>
+                                            - <lightning-formatted-number value={dataoms.simOrderCredits} minimum-fraction-digits="2"></lightning-formatted-number>                                            
+                                        </td>
+                                    </tr>
+                                    <tr class="slds-hint-parent">
+                                        <td class="width-30">
+                                            <div title="SubTotal">SubTotal</div>
+                                        </td>
+                                        <td>
+                                            <lightning-formatted-number value={dataoms.simOrderNetTotal} minimum-fraction-digits="2"></lightning-formatted-number>                                          
+                                        </td>
+                                    </tr>
+                                    <tr class="slds-hint-parent">
+                                        <td class="width-30">
+                                            <div title="Tax">Tax</div>
+                                        </td>
+                                        <td>
+                                            <lightning-formatted-number value={dataoms.simOrderTotalTax} minimum-fraction-digits="2"></lightning-formatted-number>                                           
+                                        </td>
+                                    </tr>
+                                    <tr class="slds-hint-parent">
+                                        <td class="width-30">
+                                            <div title="Total">Total</div>
+                                        </td>
+                                        <td>
+                                            <lightning-formatted-number value={dataoms.simOrderTotal} minimum-fraction-digits="2"></lightning-formatted-number>                                            
+                                        </td>
+                                    </tr>
+                                    <!-- Gift Cards -->
+                                     <template if:true={dataoms.showGCTab}>
+                                     <tr class="slds-hint-parent">
+                                        <td class="width-30">
+                                            <div title="Gift Cards">Gift Cards</div>
+                                        </td>
+                                        <td>
+                                            <lightning-formatted-number value={dataoms.simOrderGCPayments} minimum-fraction-digits="2"></lightning-formatted-number>                                            
+                                        </td>
+                                    </tr>
+                                     <tr class="slds-hint-parent">
+                                        <td class="width-30">
+                                            <div title="Order Total">Order Total</div>
+                                        </td>
+                                        <td>
+                                            <lightning-formatted-number value={dataoms.simOrderGrossTotal} minimum-fraction-digits="2"></lightning-formatted-number>                                            
+                                        </td>
+                                    </tr>
+                                    </template>
+                                </table>
+                            </lightning-accordion-section>
+                            <lightning-accordion-section name="D"
+                                class="create-ret-pop-sec slds-m-top_x-small slds-is-relative" label="Product Search">
+                                <template if:true={showSearchSpinner}>
+                                    <lightning-spinner variant="brand" alternative-text="Loading" size="small">
+                                    </lightning-spinner>
+                                </template>
+                                <div class="product-search-sec align-center slds-p-around_x-small slds-grid">
+                                    <div class="slds-form-element__label slds-m-right_large" style="font-weight: 500;"
+                                        title="Search By Product Number/Description">Search By Product
+                                        Number/Description</div>
+                                        <span  class="slds-m-right_medium" onkeypress={key_Code_Checker}>
+                                            <lightning-input type="text" class="prod-serach-input-key slds-m-right_medium"
+                                                 variant="label-hidden" name="serachProd"
+                                                value={genLabelVal}>
+                                            </lightning-input>
+                                        </span>
+                                    <div>
+                                        <button class="slds-button slds-button_neutral"
+                                            onclick={searchProducts}>Search</button>
+                                    </div>
+                                    <template if:true={isSerachError}>
+                                        <div class="slds-col search-err">
+                                            <spam key={error}>{dataoms.searchErrMsg}</spam>                                       
+                                        </div>
+                                    </template>                                    
+                                </div>
+                                <div class="slds-scrollable_y" style="max-height: 400px;">
+                                    <table
+                                        class="slds-table slds-table_cell-buffer slds-table_col-bordered slds-table_bordered order-items-tbl slds-m-bottom_x-small tableWrap"
+                                        aria-label="Product Search">
+                                        <thead>
+                                            <tr class="slds-line-height_reset">
+                                                <th scope="col" style="width:7%">
+                                                    <div title="Action">Action</div>
+                                                </th>
+                                                <th scope="col" style="width:6%">
+                                                    <div title="BOM">BOM</div>
+                                                </th>
+                                                <th scope="col" class="slds-cell-wrap" style="width:9%">
+                                                    <div title="Product Number">Product Number
+                                                    </div>
+                                                </th>
+                                                <th scope="col" style="width:14%">
+                                                    <div title="Description">Description</div>
+                                                </th>
+                                                <th scope="col" class="slds-cell-wrap" style="width:6%">
+                                                    <div title="OMS Image Url">OMS Image Url</div>
+                                                </th>
+                                                <th scope="col" style="width:9%">
+                                                    <div title="Quantity">Quantity</div>
+                                                </th>
+                                                <th scope="col" style="width:6%">
+                                                    <div title="Inventory">Inventory</div>
+                                                </th>
+                                                <th scope="col" style="width:6%">
+                                                    <div title="UoM">UoM
+                                                    </div>
+                                                </th>
+                                                <th scope="col" style="width:6%">
+                                                    <div title="Price">Price</div>
+                                                </th>
+                                                <th scope="col" style="width:5%">
+                                                    <div title="On Sale">On Sale</div>
+                                                </th>
+                                                <th scope="col" style="width:5%">
+                                                    <div title="Obsolete">Obsolete</div>
+                                                </th>
+                                                <th scope="col" style="width:4%">
+                                                    <div title="Status">Status</div>
+                                                </th>
+                                                <th scope="col" style="width:7%">
+                                                    <div title="Replaceable">Replaceable</div>
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <template if:true={dataoms}>
+                                                <template for:each={dataoms.searchProductsList} for:item="sp">
+                                                    <tr key={sp.materialId} class="slds-hint-parent">
+                                                        <td>                                                           
+                                                            <template if:true={sp.isAvailable}>
+                                                                <lightning-button label="Add" data-id={sp.materialId}
+                                                                data-cat="SearchProduct"
+                                                                onclick={addProductsToOrder}
+                                                                disabled={sp.disableBtn}></lightning-button>
+                                                            </template>                                                                
+                                                            <template if:false={sp.isAvailable}>
+                                                                <lightning-button label="Add" disabled></lightning-button>
+                                                            </template>                                                           
+                                                        </td>
+                                                        <td>                                                          
+                                                            <template if:true={sp.bomComponents}>
+                                                                <lightning-button label="BOM"
+                                                                    data-id={sp.materialId} onclick={explodeBom}>
+                                                                </lightning-button>
+                                                            </template>
+                                                            <template if:false={sp.bomComponents}>
+                                                                <lightning-button label="BOM" disabled>
+                                                                </lightning-button>
+                                                            </template>                                                           
+                                                        </td>
+                                                        <td class="slds-cell-wrap">
+                                                            <div class="slds-form-element__static">
+                                                                <a href="#" data-id={sp.materialId}
+                                                                    onclick={openRecord}>{sp.materialNumber}</a>
+                                                            </div>
+                                                        </td>
+                                                        <td class="slds-cell-wrap">
+                                                            <div class="slds-form-element__static">
+                                                                {sp.materialDescription}
+                                                            </div>
+                                                        </td>
+                                                        <td class="slds-cell-wrap">
+                                                            <img src={sp.productImageUrl} alt="" />
+                                                        </td>
+                                                        <td class="slds-cell-wrap">
+                                                            <div class="slds-form-element__static">
+                                                                <lightning-input type="number" data-id={sp.materialId} onkeyup={bindSearchQuantity} variant="label-hidden"
+                                                                    value={sp.quantity} required></lightning-input>
+                                                            </div>
+                                                        </td>
+                                                        <td class="slds-cell-wrap">
+                                                            <div class="slds-form-element__static">
+                                                                {sp.inventory}
+                                                            </div>
+                                                        </td>
+                                                        <td class="slds-cell-wrap">
+                                                            <div class="slds-form-element__static">{sp.quantityUom}
+                                                            </div>
+                                                        </td>
+                                                        <td>
+                                                            <div class="slds-form-element__static">{sp.msrp}
+                                                            </div>
+                                                        </td>
+                                                        <td class="slds-cell-wrap">
+                                                            <lightning-input type="checkbox" variant="label-hidden"
+                                                                value={sp.onSale} disabled></lightning-input>
+                                                        </td>
+                                                        <td class="slds-cell-wrap">
+                                                            <lightning-input type="checkbox" variant="label-hidden"
+                                                                value={sp.obsolete} disabled></lightning-input>
+                                                        </td>
+                                                        <td class="slds-cell-wrap">
+                                                            <div class="slds-form-element__static">{sp.sapMatStatus}
+                                                            </div>
+                                                        </td>
+                                                        <td class="slds-cell-wrap">
+                                                            <lightning-input type="checkbox" variant="label-hidden"
+                                                                value={sp.replaceable} disabled></lightning-input>
+                                                        </td>
+                                                    </tr>
+                                                </template>
+                                            </template>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </lightning-accordion-section>
+                            <lightning-accordion-section name="E" class="create-ret-pop-sec slds-m-top_x-small"
+                                label="Case Products">
+                                <div class="slds-p-bottom_xx-small align-center">
+                                    <button class="slds-button slds-button_neutral" data-cat="Parent"
+                                        onclick={addAllProductsToCart}>Add All</button>
+                                </div>
+                                <table
+                                    class="slds-table slds-table_cell-buffer slds-table_col-bordered slds-table_bordered order-items-tbl slds-m-bottom_x-small"
+                                    aria-label="Case Products" style="table-layout: fixed;">
+                                    <thead>
+                                        <tr class="slds-line-height_reset">
+                                            <th scope="col" style="width:7%">
+                                                <div title="Action">Action</div>
+                                            </th>
+                                            <th scope="col" style="width:6%">
+                                                <div title="BOM">BOM</div>
+                                            </th>
+                                            <th scope="col" class="slds-cell-wrap" style="width:9%">
+                                                <div title="Product Number">Product Number
+                                                </div>
+                                            </th>
+                                            <th scope="col" style="width:14%">
+                                                <div title="Description">Description</div>
+                                            </th>
+                                            <th scope="col" class="slds-cell-wrap" style="width:6%">
+                                                <div title="OMS Image Url">OMS Image Url</div>
+                                            </th>
+                                            <th scope="col" style="width:9%">
+                                                <div title="Quantity">Quantity</div>
+                                            </th>
+                                            <th scope="col" style="width:6%">
+                                                <div title="Inventory">Inventory</div>
+                                            </th>
+                                            <th scope="col" style="width:6%">
+                                                <div title="UoM">UoM
+                                                </div>
+                                            </th>
+                                            <th scope="col" style="width:6%">
+                                                <div title="Price">Price</div>
+                                            </th>
+                                            <th scope="col" style="width:5%">
+                                                <div title="On Sale">On Sale</div>
+                                            </th>
+                                            <th scope="col" style="width:5%">
+                                                <div title="Obsolete">Obsolete</div>
+                                            </th>
+                                            <th scope="col" style="width:4%">
+                                                <div title="Status">Status</div>
+                                            </th>
+                                            <th scope="col" style="width:7%">
+                                                <div title="Replaceable">Replaceable</div>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <template if:true={dataoms}>
+                                            <template for:each={dataoms.caseProductsList} for:item="cp">
+                                                <tr key={cp.materialId} class="slds-hint-parent">
+                                                    <td>                                                       
+                                                        <template if:true={cp.isAvailable}>                                                           
+                                                            <lightning-button label="Add" data-id={cp.materialId}
+                                                            data-cat="Parent" onclick={addProductsToOrder}
+                                                            disabled={cp.disableBtn}></lightning-button> 
+                                                        </template>                                                                
+                                                        <template if:false={cp.isAvailable}>
+                                                            <lightning-button label="Add" disabled></lightning-button>
+                                                        </template>   
+                                                    </td>
+                                                    <td>
+                                                        <template if:true={cp.bomComponents}>
+                                                            <lightning-button label="BOM" data-id={cp.materialId}
+                                                                data-cpid={cp.caseProductId} onclick={explodeBom}>
+                                                            </lightning-button>
+                                                        </template>
+                                                        <template if:false={cp.bomComponents}>
+                                                            <lightning-button label="BOM" disabled></lightning-button>
+                                                        </template>
+                                                    </td>
+                                                    <td class="slds-cell-wrap">
+                                                        <div class="slds-form-element__static">
+                                                            <a href="#" data-id={cp.materialId}
+                                                                onclick={openRecord}>{cp.materialNumber}</a>
+                                                        </div>
+                                                    </td>
+                                                    <td class="slds-cell-wrap">
+                                                        <div class="slds-form-element__static">
+                                                            {cp.materialDescription}
+                                                        </div>
+                                                    </td>
+                                                    <td class="slds-cell-wrap">
+                                                        <img src={cp.productImageUrl} alt="" />
+                                                    </td>
+                                                    <td class="slds-cell-wrap">
+                                                        <div class="slds-form-element__static">
+                                                            <lightning-input type="number" data-id={cp.materialId} onkeyup={bindCaseQuantity} variant="label-hidden"
+                                                                value={cp.quantity} required></lightning-input>
+                                                        </div>
+                                                    </td>
+                                                    <td class="slds-cell-wrap">
+                                                        <div class="slds-form-element__static">
+                                                            {cp.inventory}
+                                                        </div>
+                                                    </td>
+                                                    <td class="slds-cell-wrap">
+                                                        <div class="slds-form-element__static">{cp.quantityUom}
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="slds-form-element__static">{cp.msrp}
+                                                        </div>
+                                                    </td>
+                                                    <td class="slds-cell-wrap">
+                                                        <lightning-input type="checkbox" variant="label-hidden"
+                                                            value={cp.onSale} disabled></lightning-input>
+                                                    </td>
+                                                    <td class="slds-cell-wrap">
+                                                        <lightning-input type="checkbox" variant="label-hidden"
+                                                            value={cp.obsolete} disabled></lightning-input>
+                                                    </td>
+                                                    <td class="slds-cell-wrap">
+                                                        <div class="slds-form-element__static">{cp.sapMatStatus}
+                                                        </div>
+                                                    </td>
+                                                    <td class="slds-cell-wrap">
+                                                        <lightning-input type="checkbox" variant="label-hidden"
+                                                            value={cp.replaceable} disabled></lightning-input>
+                                                    </td>
+                                                </tr>
+                                            </template>
+                                        </template>
+                                    </tbody>
+                                </table>
+                            </lightning-accordion-section>
+                            <lightning-accordion-section name="F" class="create-ret-pop-sec slds-m-top_x-small"
+                                label="BOM Components">
+                                <div class="slds-p-bottom_xx-small align-center">
+                                    <template if:false={isBomCompListEmpty}>
+                                        <button class="slds-button slds-button_neutral slds-p-right_small"
+                                            data-cat="Child" onclick={addAllProductsToCart}>Add All</button>
+                                        <button class="slds-button slds-button_neutral"
+                                            onclick={clearBomComponents}>Clear</button>
+                                    </template>
+                                </div>
+                                <table
+                                    class="slds-table slds-table_cell-buffer slds-table_col-bordered slds-table_bordered order-items-tbl slds-m-top_x-small slds-m-bottom_x-small"
+                                    aria-label="BOM Components" style="table-layout: fixed;">
+                                    <thead>
+                                        <tr class="slds-line-height_reset">
+                                            <th scope="col" style="width:8%">
+                                                <div title="Action">Action</div>
+                                            </th>
+                                            <th scope="col" class="slds-cell-wrap" style="width:8%">
+                                                <div title="Component Number">Component Number</div>
+                                            </th>
+                                            <th scope="col" class="slds-cell-wrap" style="width:16%">
+                                                <div title="Component Description">Component Description
+                                                </div>
+                                            </th>
+                                            <th scope="col" class="slds-cell-wrap" style="width:7%">
+                                                <div title="OMS Image Url">OMS Image Url</div>
+                                            </th>
+                                            <th scope="col" class="slds-cell-wrap" style="width:7%">
+                                                <div title="Parent Product">Parent Product</div>
+                                            </th>
+                                            <th scope="col" class="slds-cell-wrap" style="width:16%">
+                                                <div title="Product Description">Product Description</div>
+                                            </th>
+                                            <th scope="col" style="width:8%">
+                                                <div title="Quantity">Quantity</div>
+                                            </th>
+                                            <th scope="col" style="width:6%">
+                                                <div title="Inventory">Inventory</div>
+                                            </th>
+                                            <th scope="col" style="width:4%">
+                                                <div title="UoM">UoM
+                                                </div>
+                                            </th>
+                                            <th scope="col" style="width:5%">
+                                                <div title="Price">Price</div>
+                                            </th>
+                                            <th scope="col" style="width:6%">
+                                                <div title="Obsolete">Obsolete</div>
+                                            </th>
+                                            <th scope="col" style="width:5%">
+                                                <div title="Status">Status</div>
+                                            </th>
+                                            <th scope="col" style="width:8%">
+                                                <div title="Replaceable">Replaceable</div>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <template if:true={dataoms}>
+                                            <template for:each={dataoms.bomComponentsList} for:item="bc">
+                                                <tr key={bc.componentId} class="slds-hint-parent">
+                                                    <td>                                                                                                               
+                                                        <template if:true={bc.isAvailable}>                                                           
+                                                            <lightning-button label="Add" data-id={bc.componentId}
+                                                            data-cat="Child" onclick={addProductsToOrder}
+                                                            disabled={bc.disableBtn}></lightning-button>   
+                                                        </template>                                                                
+                                                        <template if:false={bc.isAvailable}>
+                                                            <lightning-button label="Add" disabled></lightning-button>
+                                                        </template>                                                         
+                                                    </td>
+                                                    <td class="slds-cell-wrap">
+                                                        <div class="slds-form-element__static">
+                                                            <a href="#" data-id={bc.componentId}
+                                                                onclick={openRecord}>{bc.componentNumber}</a>
+                                                        </div>
+                                                    </td>
+                                                    <td class="slds-cell-wrap">
+                                                        <div class="slds-form-element__static">
+                                                            {bc.componentDescription}
+                                                        </div>
+                                                    </td>
+                                                    <td class="slds-cell-wrap">
+                                                        <img src={bc.productImageUrl} alt="" />
+                                                    </td>
+                                                    <td class="slds-cell-wrap">
+                                                        <div class="slds-form-element__static">
+                                                            {bc.parentNumber}
+                                                        </div>
+                                                    </td>
+                                                    <td class="slds-cell-wrap">
+                                                        <div class="slds-form-element__static">
+                                                            {bc.parentDescription}
+                                                        </div>
+                                                    </td>
+                                                    <td class="slds-cell-wrap">
+                                                        <lightning-input type="number" data-id={bc.componentId} onkeyup={bindBOMQuantity} variant="label-hidden"
+                                                            value={bc.quantity} required></lightning-input>
+                                                    </td>
+                                                    <td class="slds-cell-wrap">
+                                                        <div class="slds-form-element__static">{bc.inventory}
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="slds-form-element__static">{bc.quantityUom}
+                                                        </div>
+                                                    </td>
+                                                    <td class="slds-cell-wrap">
+                                                        <div class="slds-form-element__static">{bc.msrp}
+                                                        </div>
+                                                    </td>
+                                                    <td class="slds-cell-wrap">
+                                                        <lightning-input type="checkbox" variant="label-hidden"
+                                                            value={bc.obsolete} disabled></lightning-input>
+                                                    </td>
+                                                    <td class="slds-cell-wrap">
+                                                        <div class="slds-form-element__static">{bc.sapMatStatus}
+                                                        </div>
+                                                    </td>
+                                                    <td class="slds-cell-wrap">
+                                                        <lightning-input type="checkbox" variant="label-hidden"
+                                                            value={bc.replaceable} disabled></lightning-input>
+                                                    </td>
+                                                </tr>
+                                            </template>
+                                        </template>
+                                    </tbody>
+                                </table>
+                            </lightning-accordion-section>
+                            <template if:true={couponsSecEnable}>
+                                <lightning-accordion-section name="H"
+                                class="create-ret-pop-sec slds-m-top_x-small slds-is-relative" label="Cart : Coupons/Promotions">
+                                <template if:true={showSearchSpinner}>
+                                    <lightning-spinner variant="brand" alternative-text="Loading" size="small">
+                                    </lightning-spinner>
+                                </template>
+                                <div class="product-search-sec align-center slds-p-around_x-small slds-grid">
+                                    <div class="slds-form-element__label slds-m-right_large" style="font-weight: 500;"
+                                        title="Coupons/Promotions">Coupons/Promotions</div>
+                                    <lightning-input type="text" class="coupon-serach-input-key slds-m-right_medium"
+                                        style="width: 25%;" variant="label-hidden" name="serachCoupon"
+                                        value={dataoms.couponCode}>
+                                    </lightning-input>
+                                    <div class="slds-col" style="text-align: left;">
+                                        <button class="slds-button slds-button_neutral"
+                                            onclick={addCouponCode}>Add Coupon</button>
+                                    </div>
+                                </div>
+                                <div class="slds-scrollable_y" style="max-height: 400px;">
+                                    <table
+                                        class="slds-table slds-table_cell-buffer slds-table_col-bordered slds-table_bordered order-items-tbl slds-m-bottom_x-small tableWrap"
+                                        aria-label="Product Search">
+                                        <thead>
+                                            <tr class="slds-line-height_reset">
+                                                <th scope="col" style="width:25%">
+                                                    <div title="Action">Action</div>
+                                                </th>
+                                                <th scope="col" style="width:40%">
+                                                    <div title="BOM">Coupon</div>
+                                                </th>
+                                                <th scope="col" class="slds-cell-wrap" style="width:35%">
+                                                    <div title="Product Number">Status Code
+                                                    </div>
+                                                </th>                                                
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <template if:true={dataoms}>
+                                                <template for:each={dataoms.couponsList} for:item="c">
+                                                    <tr key={c.couponId} class="slds-hint-parent">
+                                                        <td class="slds-cell-wrap">
+                                                            <div class="slds-form-element__static">                                                               
+                                                                <img src={cross} alt="" data-id={c.couponId}
+                                                                        onclick={removeCoupon} />
+                                                            </div>
+                                                        </td>                                                        
+                                                        <td class="slds-cell-wrap">
+                                                            <div class="slds-form-element__static">
+                                                                {c.couponName}
+                                                            </div>
+                                                        </td>
+                                                        <td class="slds-cell-wrap">
+                                                            <div class="slds-form-element__static">
+                                                                {c.status}
+                                                            </div>
+                                                        </td>                                                       
+                                                    </tr>
+                                                </template>
+                                            </template>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </lightning-accordion-section>
+                            </template>                            
+                            <lightning-accordion-section name="G" class="create-ret-pop-sec slds-m-top_x-small"
+                                label="Cart : Order Products">
+                                <template if:false={isOrderProdListEmpty}>
+                                    <div class="slds-p-bottom_xx-small align-center">
+                                        <button class="slds-button slds-button_neutral" data-cat="Remove All"
+                                            onclick={remAllProductsFromCart}>Remove All</button>
+                                    </div>
+                                </template>
+                                <table
+                                    class="slds-table slds-table_cell-buffer slds-table_col-bordered slds-table_bordered order-items-tbl slds-m-top_x-small slds-m-bottom_x-small"
+                                    aria-label="Cart : Order Products" style="table-layout: fixed;">
+                                    <thead>
+                                        <tr class="slds-line-height_reset">
+                                            <th scope="col" style="width:7%">
+                                                <div title="Action">Action</div>
+                                            </th>
+                                            <th scope="col" class="slds-cell-wrap" style="width:8%">
+                                                <div title="Material Number">Material Number</div>
+                                            </th>
+                                            <th scope="col" class="slds-cell-wrap" style="width:20%">
+                                                <div title="Material Description">Material Description
+                                                </div>
+                                            </th>
+                                            <th scope="col" class="slds-cell-wrap" style="width:10%">
+                                                <div title="Item Level Discount">Item Level Discount</div>
+                                            </th>
+                                            <th scope="col" class="slds-cell-wrap" style="width:7%">
+                                                <div title="Order Quantity">Order Quantity</div>
+                                            </th>
+                                            <th scope="col" style="width:5%">
+                                                <div title="UOM">UOM</div>
+                                            </th>
+                                            <th scope="col" class="slds-cell-wrap" style="width:6%">
+                                                <div title="Unit Price">Unit Price</div>
+                                            </th>
+                                            <template if:true={dataoms.enableOCAPICallout}>
+                                                <th scope="col" class="slds-cell-wrap" style="width:9%">
+                                                    <div title="eComm Sale Price">eComm Sale Price
+                                                    </div>
+                                                </th>
+                                                <th scope="col" class="slds-cell-wrap" style="width:9%">
+                                                    <div title="eComm Coupons/Promotions">eComm Coupons/Promotions
+                                                    </div>
+                                                </th>
+                                                <th scope="col" class="slds-cell-wrap" style="width:9%">
+                                                    <div title="eComm Promotion Text">eComm Promotion Text
+                                                    </div>
+                                                </th>
+                                            </template>
+                                            <th scope="col" class="slds-cell-wrap" style="width:7%">
+                                                <div title="CRM Discount">CRM Discount</div>
+                                            </th> 
+                                            <template if:true={dataoms.applyCredit}>
+                                                <th scope="col" class="slds-cell-wrap" style="width:7%">
+                                                    <div title="Credit Applied">Credit Applied</div>
+                                                </th> 
+                                            </template>                                         
+                                            <th scope="col" class="slds-cell-wrap" style="width:9%">
+                                                <div title="Final Price(excl Tax)">Final Price(excl Tax)
+                                                </div>
+                                            </th>
+                                            <th scope="col" style="width:5%">
+                                                <div title="Tax">Tax</div>
+                                            </th>
+                                            <th scope="col" class="slds-cell-wrap" style="width:9%">
+                                                <div title="Currently Available">Currently Available</div>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <template if:true={dataoms}>
+                                            <template for:each={dataoms.orderProductsList} for:item="op">
+                                                <tr key={op.materialId} class="slds-hint-parent">
+                                                    <td class="slds-cell-wrap">
+                                                        <div class="slds-form-element__static">
+                                                            <img src={cross} alt="" data-id={op.itemNumber}
+                                                                onclick={removeProductsFromOrder} />
+                                                        </div>
+                                                    </td>
+                                                    <td class="slds-cell-wrap">
+                                                        <div class="slds-form-element__static">
+                                                            <a href="#" data-id={op.materialId}
+                                                                onclick={openRecord}>{op.materialNumber}</a>
+                                                        </div>
+                                                    </td>
+                                                    <td class="slds-cell-wrap">
+                                                        <div class="slds-form-element__static">
+                                                            {op.materialDesc}
+                                                        </div>
+                                                    </td>
+                                                    <td class="slds-cell-wrap">
+                                                        <div class="slds-form-element__static">
+                                                            <lightning-combobox name="iDiscount" variant="label-hidden"
+                                                                value={op.itemLevelDiscountCode} data-id={op.materialId} placeholder="Select"
+                                                                options={itemLevelDiscounts}
+                                                                onchange={UpdateOPDiscount}>
+                                                            </lightning-combobox>
+                                                        </div>
+                                                    </td>
+                                                    <td class="slds-cell-wrap">
+                                                        <div class="slds-form-element__static">
+                                                            {op.quantity}
+                                                        </div>
+                                                    </td>
+                                                    <td class="slds-cell-wrap">
+                                                        <div class="slds-form-element__static">{op.quantityUom}
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <template if:true={op.disableUnitPrice}>
+                                                            <div class="slds-form-element__static">{op.msrp}</div>
+                                                        </template>  
+                                                        <template if:false={op.disableUnitPrice}>
+                                                            <lightning-input type="text" data-id={op.materialId} value={op.msrp} variant="label-hidden" onkeyup={bindUnitPrice}></lightning-input>
+                                                        </template>                                                        
+                                                    </td>
+                                                    <template if:true={dataoms.enableOCAPICallout}>
+                                                        <td>
+                                                            <div class="slds-form-element__static">{op.eCommSalePrice}</div>
+                                                        </td>
+                                                        <td>
+                                                            <div class="slds-form-element__static">{op.eCommDiscount}</div>
+                                                        </td>
+                                                        <td class="slds-cell-wrap">
+                                                            <ul>
+                                                                <template for:each={op.eCommPromotionText} for:item="pText" for:index="index">
+                                                                    <li key={pText}>{pText}</li>
+                                                                </template>
+                                                            </ul>                                                            
+                                                        </td>
+                                                    </template>
+                                                    <td class="slds-cell-wrap">
+                                                        <div class="slds-form-element__static">{op.itemTotalDiscount}
+                                                        </div>
+                                                    </td>
+                                                    <template if:true={dataoms.applyCredit}>
+                                                        <td class="slds-cell-wrap">
+                                                            <div class="slds-form-element__static">{op.creditApplied} </div>                                                           
+                                                        </td>                                                       
+                                                    </template>   
+                                                    <td class="slds-cell-wrap">
+                                                        <template if:true={op.free}>
+                                                            <div class="slds-form-element__static">0.00</div>
+                                                        </template>
+                                                        <template if:false={op.free}>
+                                                            <div class="slds-form-element__static">{op.subTotal}</div>
+                                                        </template>
+                                                    </td>
+                                                    <td class="slds-cell-wrap">
+                                                        <div class="slds-form-element__static">{op.taxValue}
+                                                        </div>
+                                                    </td>
+                                                    <td class="slds-cell-wrap">
+                                                        <c-product-availability-flag flag-green={flagGreen}
+                                                            flag-yellow={flagYellow} flag-red={flagRed}
+                                                            is-available={op.currentlyAvailable}>
+                                                        </c-product-availability-flag>
+                                                    </td>
+                                                </tr>
+                                            </template>
+                                        </template>
+                                    </tbody>
+                                </table>
+                            </lightning-accordion-section>
+                        </template>
+                    </template>
+                </lightning-accordion>
+            </div>
+        <template if:true={isBrandSelected}>
+            <footer class="slds-modal__footer">
+                <button onclick={closePopup} class="slds-button slds-button_neutral">Cancel</button>
+                <button class="slds-button slds-button_brand" onclick={simulateSalesOrder}>Simulate Order</button>
+                <button class="slds-button slds-button_brand" onclick={createOMSOrder}>Create Order</button>
+            </footer>
+        </template>
+        </div>
+    </section>
+    <div class="slds-backdrop slds-backdrop_open"></div>
+</template>

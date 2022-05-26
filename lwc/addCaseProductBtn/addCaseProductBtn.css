@@ -1,0 +1,17 @@
+.slds-modal__container {
+    max-width: 95rem !important;
+    width: 95% !important;
+}
+
+.card-container{
+    padding-left: 12px;
+}
+
+
+.search-container{
+    padding-left: 10px;
+}
+
+.bt-test{
+    width: 65% !important; 
+}

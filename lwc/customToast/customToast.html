@@ -1,0 +1,33 @@
+<!--
+    * File........... : customToast
+    * Created by..... : Jnanesh Avaradi
+    * Created Date... : 04-15-2022
+    * Description.... : Custom Toast Message which works in VF page/Lightning out
+    * Parameters: 
+        type       - success, error, info, and warning
+        message    - Display text message on the toast notification
+
+    * How to use: 
+        Add this component in the parent component html
+        Ex: <c-custom-toast auto-close-time="5000"></c-custom-toast>
+        Call the component from js
+        Ex: this.template.querySelector('c-custom-toast').showToast('success', 'This is a Success Message.');
+-->
+<template>
+    <template if:true={showToastBar}>
+        <div class="slds-notify_container">
+            <div class={outerClass} role="status">
+                <span class="slds-assistive-text">{type}</span>
+                <span class={innerClass} title={message}>
+                    <lightning-icon icon-name={getIconName} alternative-text="icon" styleclass="slds-icon slds-icon_small" variant="inverse" size="small"></lightning-icon>
+                </span>
+                <div class="slds-notify__content">
+                    <h2 class="slds-text-heading_small">{message}</h2>
+                </div>
+                <div class="slds-notify__close">
+                    <lightning-button-icon icon-name="utility:close" size="small" variant="border-filled" class="slds-button slds-button_icon slds-button_icon-inverse" alternative-text="next" onclick={closeModel} ></lightning-button-icon>
+                </div>
+            </div>
+        </div>
+    </template>
+</template>
