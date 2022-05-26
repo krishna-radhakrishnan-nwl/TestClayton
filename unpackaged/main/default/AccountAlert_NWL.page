@@ -1,0 +1,10 @@
+<apex:page standardController="Account"  extensions="AlertController_NWL" >
+
+	<apex:includeScript value="{!$Resource.alertutils_NWL}"/> 
+
+	<script>
+		Window.onunload = function(){alertWindowUnload();}
+		displayAlert('{!hasAlerts}', '{!$CurrentPage.parameters.Id}', {!popupWindowHeight});		
+	</script>		
+		
+</apex:page>
