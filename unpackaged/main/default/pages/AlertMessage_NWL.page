@@ -1,0 +1,79 @@
+<apex:page Controller="AlertController_NWL" showHeader="false" renderAs="HTML" title="NewellRubbermaid Alerts"   lightningStylesheets="true">
+
+    <div class="nwl-bPageTitle">
+        <div class="nwl-ptBody">
+            <div class="nwl-pageTitleIcon">
+                <div class="nwl-blank">&nbsp;</div>
+                <h2 class="nwl-pageDescription"> Alert !!! </h2>
+                <div class="blank">&nbsp;</div>
+            </div>
+        </div>
+
+        <div class="nwl-blank">&nbsp;</div>
+    </div>
+
+	<apex:form id="afrm">
+		<apex:pageMessages id="mess" showDetail="true"/>
+		<apex:pageBlock >
+			<apex:pageBlockTable value="{!annAlerts}" var="aA">
+				<apex:column headerValue="Hide" ><apex:inputCheckbox id="inputBox" value="{!aA.Hidden__c}" disabled="{!aA.Disabled__c}"/>
+				</apex:column>
+				<apex:column headerValue="Related To:"><apex:outputLink value="/{!aA.ObjectID__c}" target="_new">{!aA.ObjectType__c}: {!aA.Record_Name__c}</apex:outputLink></apex:column>
+				<apex:column value="{!aA.Message__c}" headerValue="Alert Message"></apex:column>
+			</apex:pageBlockTable>
+			<apex:pageBlockButtons >
+				<apex:commandButton value="Hide Selected Alerts"
+						action="{!hideAlerts}"
+						rerender="frm"
+						oncomplete="winUnload()"/>
+				<apex:commandButton value="Close Window"
+						onclick="winUnload()"/>
+			</apex:pageBlockButtons>
+		</apex:pageBlock>
+	</apex:form>
+
+	<script>
+		function winUnload(){
+			try{
+				self.close();
+			}catch(err){
+				//Handle errors here
+			}
+		}
+	</script>
+
+    <style type="text/css">
+        .nwl-bPageTitle{
+            padding: 15px 0 0;
+            padding-top: 15px;
+            padding-right: 0px;
+            padding-bottom: 0px;
+            padding-left: 0px;
+        }
+        .nwl-ptBody{
+            background-color: transparent;
+            color: #000;
+            padding: 0;
+            padding-top: 0px;
+            padding-right: 0px;
+            padding-bottom: 0px;
+            padding-left: 0px;
+        }
+        .nwl-pageDescription{
+            font-size: 1.8em;
+            font-weight: normal;
+            line-height: 0.8em;
+        }
+        .nwl-blank{
+            background-color: transparent;
+            color: #000;
+            padding: 4;
+        }
+        .nwl-pageTitleIcon{
+            margin: 1px;
+            line-height: 12px;
+            padding: 0 0 2px 40px;
+            background: url('/img/msg_icons/warning32.png') no-repeat left top;
+        }
+    </style>
+</apex:page>

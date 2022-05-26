@@ -1,0 +1,125 @@
+<apex:page showHeader="true" sidebar="true" controller="MoneybackApprovalAreaController_NWL">
+	
+	<style type="text/css">
+		.nwl-btn{
+			text-align: center;
+		}
+		.nwl-msg{
+		    color: #FF0000;
+		    font-weight: bold;
+			border-width: 1px;
+		}
+	</style>
+
+	<apex:form >
+
+		<apex:pageBlock title="Moneyback Approval">
+			
+			<apex:outputPanel id="maac__msg">
+		        <apex:messages styleClass="nwl-msg" />		        
+		    </apex:outputPanel>
+
+		    <apex:pageBlockButtons location="top">
+                <apex:actionStatus id="saveButtonStatus">
+                    <apex:facet name="stop">
+                        <apex:outputPanel >
+							<apex:commandbutton value="Select All" action="{!processSelector}" reRender="maac__table, maac__msg" >
+								<apex:param name="selectAll" value="true" assignTo="{!selectorAction}" />
+							</apex:commandbutton>
+							<apex:commandbutton value="Deselect All" action="{!processSelector}" reRender="maac__table, maac__msg" >
+								<apex:param name="deselectAll" value="false" assignTo="{!selectorAction}" />
+							</apex:commandbutton>
+							<apex:commandbutton value="Approve" action="{!processApproval}" reRender="maac__msg, maac__section" status="saveButtonStatus">
+								<apex:param name="approve" value="Approve" assignTo="{!approvalAction}"/>
+							</apex:commandbutton>
+							<apex:commandbutton value="Reject" action="{!processApproval}" reRender="maac__msg, maac__section" status="saveButtonStatus">
+								<apex:param name="reject" value="Reject" assignTo="{!approvalAction}" />
+							</apex:commandbutton>
+                        </apex:outputPanel>
+                    </apex:facet>
+                    <apex:facet name="start">
+                        <apex:outputPanel >
+							<apex:commandbutton value="Select All"  disabled="true" />
+							<apex:commandbutton value="Deselect All"  disabled="true" />
+							<apex:commandbutton value="Approve"  disabled="true" />
+							<apex:commandbutton value="Reject"  disabled="true" />
+							<img src="/img/loading.gif" />
+                        </apex:outputPanel>
+                    </apex:facet>
+                </apex:actionStatus>
+            </apex:pageBlockButtons>
+
+		    <apex:pageBlockSection title="List Of Moneybacks" columns="1" id="maac__section">
+
+		    	<apex:outputPanel id="maac__queueSelection">
+		    		<apex:outputLabel value="Select Your Queue for Approval: " />
+			    	<apex:selectList value="{!selectedQueue}" multiselect="FALSE" size="1">
+			    		<apex:selectOptions value="{!myQueues}" />
+			    		<apex:actionSupport event="onchange" action="{!getQueueUsers}" rerender="maac__table, maac__msg, maac_managerSelection" status="saveButtonStatus"/>
+			    	</apex:selectList>			    	
+			    </apex:outputPanel>	
+
+			    <apex:outputPanel id="maac_managerSelection">			    				    	
+			    	<apex:outputLabel value="Select Case Owner Manager: " rendered="{!AND(selectedQueue!='--None--', selectedQueue != NULL)}"/>			    	
+			    	<apex:selectList value="{!selectedMgr}" multiselect="FALSE" size="1" rendered="{!AND(selectedQueue!='--None--', selectedQueue != NULL)}">
+			    		<apex:selectOptions value="{!myCaseOwnerMgr}"/>
+			    		<apex:actionSupport event="onchange" action="{!resetMoneyBack}" rerender="maac__table, maac__msg" status="saveButtonStatus"/>
+			    	</apex:selectList>			    
+				</apex:outputPanel>
+
+				<apex:pageBlockTable value="{!validMoneybackWrappers}" var="item" title="Items" width="100%" id="maac__table">
+
+			        <apex:column headerValue="Select" style="border-width: 1px;">
+			        	<apex:inputCheckbox value="{!item.selected}" />
+			        </apex:column>
+
+			        <apex:column headerValue="Request Amount" style="border-width: 1px;">
+			        	<apex:outputText value="{!item.moneyback.Request_Amount__c}" />
+			        </apex:column>
+
+			        <apex:column headerValue="Brand" style="border-width: 1px;">
+			        	<apex:outputText value="{!item.moneyback.Brand__c}" />
+			        </apex:column>
+
+			        <apex:column headerValue="Contact" style="border-width: 1px;">
+			        	<apex:outputLink value="/{!item.moneyback.Contact__c}" target="_blank" >
+			        		{!item.moneyback.Contact__r.Name}
+			        	</apex:outputLink>
+			        </apex:column>
+
+			        <apex:column headerValue="Open Money Backs" style="border-width: 1px;">
+			        	<apex:outputText value="{!item.moneyback.Contact__r.OpenMoneybacks__c}" />
+			        </apex:column>
+
+			        <apex:column headerValue="Case #" style="border-width: 1px;">			        	
+			        	<apex:outputLink value="/{!item.moneyback.Case_ID__c}" target="_blank" >
+			        		{!item.moneyback.Case_Number__c}
+			        	</apex:outputLink>
+			        </apex:column>
+
+			        <apex:column headerValue="Case Owner Mgr" style="border-width: 1px;">
+			        	<apex:outputText value="{!item.moneyback.CaseOwnerManager__c}" />
+			        </apex:column>			        
+
+			        <apex:column headerValue="Case Product" style="border-width: 1px;">
+			        	<apex:outputLink value="/{!item.moneyback.CaseProduct__c}" >
+			        		{!item.moneyback.CaseProduct__r.Name}
+			        	</apex:outputLink>
+			        </apex:column>
+
+			        <apex:column headerValue="Approval/Rejection Comments" style="border-width: 1px;">
+			        	<apex:inputText value="{!item.comments}" />
+			        </apex:column>
+
+			        <apex:column headerValue="Errors" styleClass="nwl-msg" style="border-width: 1px;">
+			        	<apex:outputText value="{!item.error}" />
+			        </apex:column>
+
+				</apex:pageBlockTable>
+			</apex:pageBlockSection>
+
+		</apex:pageBlock>
+
+	</apex:form>
+
+</apex:page>

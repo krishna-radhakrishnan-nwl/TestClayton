@@ -1,0 +1,128 @@
+<!-- CrowdTwistCouponsPage_NWL.page -->
+<apex:page showHeader="false" sidebar="false" controller="CrowdTwistCouponsController_NWL">
+    <apex:includeScript value="/support/console/50.0/integration.js" />
+    <!-- <apex:includeScript value="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js" /> -->
+    <apex:stylesheet value="{!URLFOR($Resource.OrgAssets_NWL, 'OrgAssets_NWL/css/SalesOrderRequestPage_NWL.css')}" />
+    <style>
+        .recHeader {
+            border-width: 1px;
+            text-align: left;
+        }
+        .recColumn {
+            border-width: 4px;
+            text-align: left;
+        }
+        .divider{
+            width:10px;
+            height:auto;
+            display:inline-block;
+        }
+        .nwl-addr-sec-1{
+            text-align: left;
+            width: 5%;
+            padding: 5px;
+        }
+        .nwl-addr-sec-2{
+            width: 25%;
+            padding: 5px;
+        }
+        .nwl-addr-sec-3{
+            text-align: left;
+            width: 10%;
+            padding: 5px;
+        }
+        .nwl-addr-sec-4{
+            width: 25%;
+        }
+        .nwl-addr-sec-5{
+            width: 10%;
+        }
+        .nwl-addr-sec-6{
+            width: 25%;
+        }
+        .nwl-label{
+            font-weight: bold;
+            padding-bottom: 5px;
+        }
+        .nwl-hdr-row{
+            border-bottom-color: #E8E8E8;
+            border-bottom-style: solid;
+            border-bottom-width: 1px;
+        }
+        .nwl-hrd-grid{
+            border-collapse: collapse;
+            border-spacing: 0px 0px;
+        }
+
+    </style>
+
+    <script type="text/javascript">
+        function keyEvent(e){
+            if(window.event){
+                key = window.event.keyCode;
+            } else {
+                key = e.which;
+            }
+            if(key == 13){
+                showCTCoupons();
+                return false;
+            } else {
+                return true;
+            }
+
+
+        }
+
+    </script>
+    <apex:form id="gcBal__Form">
+        <apex:pageBlock title="CrowdTwist Usable Coupons" id="ctCoupons__block">
+            <!-- Page messages -->
+            <apex:outputPanel id="ctCoupons__msg">
+                <apex:pageMessages />
+            </apex:outputPanel>
+            <apex:actionFunction name="showCTCoupons" action="{!showCoupons}" reRender="gcBal__hdr_section" />
+            <apex:pageBlockSection title="" columns="1" id="ctCoupons__hdr_section" collapsible="false">
+
+                <apex:pageblockSectionItem id="GiftCardNumber">
+                    <!-- Email -->
+                    <apex:outputLabel value="Email : " for="ctCoupons__email" styleClass="nwl-label" />
+                    <apex:inputText value="{!ctEmail}" id="ctCoupons__email" onkeypress=" return keyEvent(event)" disabled="{!errorPage}"/>
+                </apex:pageblockSectionItem>
+                <apex:pageblockSectionItem id="GiftCardPin">
+                    <!-- CrowdTwist ID -->
+                    <apex:outputLabel value="Crowd Twist ID : " for="ctCoupons__Id" styleClass="nwl-label" />
+                    <apex:inputText value="{!ctId}" id="ctCoupons__Id" onkeypress=" return keyEvent(event)" disabled="{!errorPage}"/>
+                </apex:pageblockSectionItem>
+                <apex:pageblockSectionItem id="ctCouponsSection" >
+                    <!-- CrowdTwist Coupons -->
+                      <apex:pageBlockTable value="{!ctCouponsList}" var="cp" id="ct__couponsTable" title="Usable Coupons"
+                                        width="100%" rendered="{!IF(AND(ctCouponsList!=null,ctCouponsList.size > 0), TRUE, FALSE)}">
+                    <apex:column headerValue="Coupon Code" style="border-width: 1px;" >
+                        <apex:outputText value="{!JSENCODE(cp.code)}" />
+                    </apex:column>
+                    <apex:column headerValue="Title" style="border-width: 1px;">
+                        <apex:outputText value="{!JSENCODE(cp.reward_title)}" />
+                    </apex:column>
+                </apex:pageBlockTable>
+                </apex:pageblockSectionItem>
+            </apex:pageBlockSection>
+            <!-- FOoter button section -->
+            <apex:pageBlockSection columns="1" id="ctCoupons__btn_section" >
+                <apex:pageblockSectionItem id="SearchButtonSec">
+                    <apex:outputPanel layout="block" styleClass="nwl-btn">
+                        <!-- Search button-->
+                        <apex:commandbutton value="show Coupons" action="{!showCoupons}" status="showCouponsStatus" 
+                                            reRender="ctCoupons__hdr_section,ctCoupons__msg" disabled="{!errorPage}"/>
+                        <apex:actionStatus id="showCouponsStatus">
+                            <apex:facet name="start">
+                                <img src="/img/loading.gif" />
+                            </apex:facet>
+                        </apex:actionStatus>
+                    </apex:outputPanel>
+                </apex:pageblockSectionItem>
+            </apex:pageBlockSection>
+
+
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>

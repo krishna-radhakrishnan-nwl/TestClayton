@@ -1,0 +1,29 @@
+<apex:page standardController="Account_Team_Approval__c" recordSetVar="unused"  sidebar="false" extensions="AccountTeamApprovalEditAll_NWL">
+	<apex:includeScript value="{!$Resource.UtilJS}" />
+	<apex:form >
+		<apex:pageBlock >
+			<apex:pageMessages />
+			<apex:pageBlockButtons >
+				<apex:commandButton value="Save" action="{!updateAll}"/>
+				<apex:commandButton value="Cancel" action="{!cancel}"/>
+			</apex:pageBlockButtons>
+			<apex:pageBlockTable value="{!selectRestrictedRecords}" var="a" id="table">	
+				<apex:column headerValue="Account">
+					<apex:outputField value="{!a.Account__c}"/>
+				</apex:column>			
+				<apex:column headerValue="Requestor" >
+					<apex:outputField value="{!a.OwnerId}"/>
+				</apex:column>
+				<apex:column headerValue="Account Owner">
+					<apex:outputField value="{!a.Account_Owner__c}"/>
+				</apex:column>
+				<apex:column headerValue="Approval Status">
+					<apex:inputField value="{!a.Approval_Status__c}"/>
+				</apex:column>	
+				<apex:column headerValue="Request Notes">
+					<apex:outputField value="{!a.Request_Notes__c}"/>
+				</apex:column>	
+			</apex:pageBlockTable>
+		</apex:pageBlock>
+	</apex:form>
+</apex:page>

@@ -1,0 +1,39 @@
+<apex:page standardController="Announcement__c" extensions="AnnouncementAcknowledgeController_NWL" sidebar="false" showHeader="false">
+    <apex:form >
+        <apex:includeScript value="/support/console/30.0/integration.js"/>
+        <script type="text/javascript">
+            function closeTab() {
+                sforce.console.fireEvent('NWL_Announcement', 'Refresh', function(res){
+					console.log( '>>-->> NWL_Announcement callback result', res );
+					sforce.console.getEnclosingTabId(function(result){
+                        sforce.console.closeTab(result.id);
+                    });
+				});
+            }
+            window.onload = function(){
+				var buttons = document.getElementsByTagName('input');
+
+				for(var i=0; i<buttons.length;i++){
+					if(buttons[i].value == 'New Note' || buttons[i].value == 'Attach File'){
+					   buttons[i].style.display = 'none';
+                    }
+				}
+			}
+        </script>
+        <apex:sectionHeader subtitle="{!Announcement__c.Title__c}" title="Announcement"/>
+        <apex:pageBlock >
+            <apex:pageBlockSection >
+                <apex:outputField value="{!Announcement__c.Name}"/>
+                <apex:outputField value="{!Announcement__c.Title__c}"/>
+                <apex:outputField value="{!Announcement__c.Body__c}"/>
+                <apex:outputField value="{!Announcement__c.Brand__c}"/>
+                <apex:outputField value="{!Announcement__c.Expiry_Date__c}"/>
+            </apex:pageBlockSection>
+            <apex:pageBlockButtons >
+                <apex:commandButton value="Acknowledge" action="{!acknowledge}" oncomplete="closeTab();"/>
+            </apex:pageBlockButtons>
+        </apex:pageBlock>
+
+    </apex:form>
+    <apex:relatedList subject="{!Announcement__c.Id}" list="CombinedAttachments"/>
+</apex:page>

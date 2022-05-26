@@ -1,0 +1,85 @@
+<!-- AccountSalesBwReport_NWL -->
+<apex:page showHeader="false" sidebar="false" standardController="Account">
+
+    <div>    
+        <a href="#" id="bw-rep-inv-sal-ph" target="_blank" >Invoice Sales By Product Hierarchy </a>
+        <br/>
+        <a href="#" id="bw-rep-inv-sal-br" target="_blank" >Invoice Sales By Brand </a>
+        <br/>    
+        <br/>
+    </div>
+<!--     <apex:iframe src="" scrolling="true" id="bw-report"/> -->
+
+    <apex:remoteObjects >
+        <apex:remoteObjectModel name="URLSetting_NWL__c" jsShorthand="urlSettings" fields="Name__c,URL__c,ParameterName__c" >
+            <apex:remoteObjectField name="Environment__c" jsShorthand="env" />
+            <apex:remoteObjectField name="Name" jsShorthand="name" />
+        </apex:remoteObjectModel>
+    </apex:remoteObjects>
+
+    <script type="text/javascript">
+        if (!window.console) window.console = {};
+        if (!window.console.log) window.console.log = function(){};
+        var urlName = {
+            // sal: 'Acc_Invoice_Sales',
+            salPh: 'Acc_Invoice_Sales_Ph',
+            salBr: 'Acc_Invoice_Sales_Br'
+        }
+        function addUrlParam(url, sp, sh, acc ){
+            if ( sp == 'true' ){
+                url += '?' + 'XSOLD_TO=' + acc;
+            }else if( sh == 'true' ){
+                url += '?' + 'XSHIP_TO=' + acc;
+            }
+            return url;
+        }
+        function buildUrls(recs){
+             var acc = {
+                    soldTo: '{!Account.Sold_To__c}',
+                    shipTo: '{!Account.Ship_To__c}',
+                    sapNum: '{!Account.SAP_Account_Num__c}'
+                }
+             recs.forEach( function(rec){
+                var name = rec.get("Name");
+                var uri = rec.get("URL__c");
+                var par = rec.get("ParameterName__c");
+                var urlWithParam;
+                // if( name == urlName.sal ){
+                //     urlWithParam = addUrlParam( uri, acc.soldTo, acc.shipTo, acc.sapNum );
+                //     window.frames['bw-report'].document.location.href = urlWithParam;
+                // }else 
+                if ( name == urlName.salPh ){
+                    urlWithParam = addUrlParam( uri, acc.soldTo, acc.shipTo, acc.sapNum );
+                    document.getElementById("bw-rep-inv-sal-ph").href = urlWithParam;
+                }else if ( name == urlName.salBr ){
+                    urlWithParam = addUrlParam( uri, acc.soldTo, acc.shipTo, acc.sapNum );
+                    document.getElementById("bw-rep-inv-sal-br").href = urlWithParam;
+                };
+            });
+        }
+        window.onload = function setUrl(){
+// Create new Remote Object Reference
+            var src = new SObjectModel.urlSettings();
+//Use Remote Object to query 100 records
+            src.retrieve({
+                            // limit: 3,
+                            limit: 2,
+                            where: { and: {
+                                        env: { eq: 'Account' },
+                                        // name: { in: [ urlName.sal, urlName.salPh, urlName.salBr] }
+                                        name: { in: [ urlName.salPh, urlName.salBr] }
+                                    }
+                            }
+                        },
+                        function(err,records){
+                            console.log( 'URL Setting query err : ' + err );
+                            if(err == null) {
+//Process returned "records" to display the urls in Visualforce code.
+                                console.log( records );
+                                buildUrls( records );
+                            }
+                        }
+            );
+         }
+    </script>
+</apex:page>
